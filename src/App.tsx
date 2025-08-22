@@ -1,15 +1,18 @@
+import { BrowserRouter } from 'react-router-dom'
+import { AppRoutes } from '@/routes'
+import { ToastProvider } from '@/components/ui'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
 import './App.css'
 
-
-
 function App() {
-
   return (
-    <>
-      <div>
-        <h1>Hello World</h1>
-      </div>
-    </>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <ToastProvider>
+          <AppRoutes />
+        </ToastProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
   )
 }
 

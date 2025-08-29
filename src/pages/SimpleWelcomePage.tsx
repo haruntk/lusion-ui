@@ -17,19 +17,16 @@ import {
 } from "@/components/ui"
 
 const pageVariants = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0 },
   animate: { 
-    opacity: 1, 
-    y: 0,
+    opacity: 1,
     transition: {
-      duration: 0.5,
-      staggerChildren: 0.1
+      duration: 0.3
     }
   },
   exit: { 
-    opacity: 0, 
-    y: -20,
-    transition: { duration: 0.3 }
+    opacity: 0,
+    transition: { duration: 0.2 }
   }
 }
 
@@ -48,18 +45,12 @@ const itemVariants = {
 
 export function SimpleWelcomePage() {
   React.useEffect(() => {
-    // Set document title for accessibility and SEO
+    // Set document title for accessibility and SEO  
     document.title = "Welcome to Lusion AR Dining - Experience Food in 3D"
   }, [])
 
   return (
-    <motion.div 
-      variants={pageVariants}
-      initial="initial"
-      animate="animate"
-      exit="exit"
-      className="container mx-auto px-4 py-8"
-    >
+    <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
       <motion.section 
         variants={itemVariants}
@@ -69,12 +60,17 @@ export function SimpleWelcomePage() {
         <div className="max-w-3xl mx-auto">
           <motion.h1 
             id="hero-title"
-            className="text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent"
+            className="text-4xl md:text-6xl font-bold mb-6"
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
           >
-            Experience Dining in AR
+            Experience <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold" 
+                        style={{ 
+                          WebkitBackgroundClip: 'text', 
+                          WebkitTextFillColor: 'transparent',
+                          backgroundImage: 'linear-gradient(to right, rgb(37 99 235), rgb(147 51 234))'
+                        }}>Dining in AR</span>
           </motion.h1>
           <motion.p 
             className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
@@ -162,7 +158,7 @@ export function SimpleWelcomePage() {
               description: "Simply scan a QR code to instantly view any menu item in augmented reality.",
               delay: 1.6
             }
-          ].map((feature, _index) => (
+          ].map((feature) => (
             <motion.div
               key={feature.title}
               initial={{ opacity: 0, y: 30 }}
@@ -202,12 +198,12 @@ export function SimpleWelcomePage() {
         className="py-16 text-center"
         aria-labelledby="cta-title"
       >
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.8, duration: 0.6 }}
-          whileHover={{ scale: 1.02 }}
-        >
+                  <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+            whileHover={{ scale: 1.02 }}
+          >
           <Card className="max-w-2xl mx-auto hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle id="cta-title" className="text-2xl md:text-3xl">
@@ -235,8 +231,8 @@ export function SimpleWelcomePage() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button asChild variant="outline" size="lg" className="gap-2">
-                    <Link to="/ui-demo" aria-label="View our component showcase">
-                      View Components
+                    <Link to="/about" aria-label="Learn more about us">
+                      Learn More
                       <Sparkles className="h-4 w-4" aria-hidden="true" />
                     </Link>
                   </Button>
@@ -246,6 +242,6 @@ export function SimpleWelcomePage() {
           </Card>
         </motion.div>
       </motion.section>
-    </motion.div>
+    </div>
   )
 }

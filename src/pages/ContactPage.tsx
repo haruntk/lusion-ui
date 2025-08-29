@@ -16,6 +16,8 @@ import {
   CardTitle,
   Input
 } from "@/components/ui"
+import { useToast } from "@/hooks/useToast"
+import { logger } from "@/utils"
 import { Link } from "react-router-dom"
 
 const pageVariants = {
@@ -44,6 +46,7 @@ const itemVariants = {
 }
 
 export function ContactPage() {
+  const { addToast } = useToast()
   const [formData, setFormData] = React.useState({
     name: '',
     email: '',
@@ -57,9 +60,23 @@ export function ContactPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Placeholder for form submission
-    console.log('Contact form submitted:', formData)
-    alert('Thank you for your message! We\'ll get back to you soon.')
+    
+    // Log form submission for debugging
+    logger.info('Contact form submitted', { 
+      name: formData.name, 
+      email: formData.email, 
+      subject: formData.subject,
+      messageLength: formData.message.length 
+    })
+    
+    // Show success toast
+    addToast({
+      title: "Message Sent",
+      description: "Thank you for your message! We'll get back to you soon.",
+      variant: "success"
+    })
+    
+    // Reset form
     setFormData({ name: '', email: '', subject: '', message: '' })
   }
 

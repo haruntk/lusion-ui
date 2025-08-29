@@ -1,13 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
+import { fileURLToPath } from 'url'
+
+// Reintroduce alias support (works in ESM) with explicit Node helpers; tsconfig.node.json already included
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      '@': path.resolve(__dirname, 'src'),
     },
   },
   server: {
@@ -21,16 +26,8 @@ export default defineConfig({
         changeOrigin: true,
         secure: false,
         ws: true, // Enable WebSocket proxying if needed
-        configure: (proxy, _options) => {
-          proxy.on('error', (err, _req, _res) => {
-            console.log('Proxy error:', err)
-          })
-          proxy.on('proxyReq', (proxyReq, req, _res) => {
-            console.log('Proxying request:', req.method, req.url, '→', proxyReq.path)
-          })
-          proxy.on('proxyRes', (proxyRes, req, _res) => {
-            console.log('Proxy response:', req.url, '→', proxyRes.statusCode)
-          })
+        configure: () => {
+          // Simplified proxy configuration without detailed logging
         },
       },
       // Proxy Flask AR/QR routes directly (no /api prefix)
@@ -54,15 +51,17 @@ export default defineConfig({
         target: 'http://localhost:5000',
         changeOrigin: true,
       },
-      '/healthz': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
+
     },
   },
   // Environment variables configuration
   define: {
-    __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
+    // Expose common environment variables (if they exist)
+    // These will be available as import.meta.env.VITE_*
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:5000/api'),
+    'import.meta.env.VITE_API_BASE': JSON.stringify(process.env.VITE_API_BASE || 'http://localhost:5000/api'),
+    'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.VITE_APP_VERSION || '1.0.0'),
+    'import.meta.env.VITE_DISABLE_STRICT_MODE': JSON.stringify(process.env.VITE_DISABLE_STRICT_MODE || 'false'),
   },
   // Build configuration
   build: {

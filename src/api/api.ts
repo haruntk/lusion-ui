@@ -15,7 +15,7 @@ export function getData<T>(response: AxiosResponse, dataSchema?: z.ZodType<T>): 
   const responseData = response.data
 
   // For simple responses that don't follow the standard API format (like Flask's direct responses)
-  if (dataSchema && !responseData.hasOwnProperty('success')) {
+  if (dataSchema && !Object.prototype.hasOwnProperty.call(responseData, 'success')) {
     try {
       return dataSchema.parse(responseData)
     } catch (error) {
@@ -25,7 +25,7 @@ export function getData<T>(response: AxiosResponse, dataSchema?: z.ZodType<T>): 
           error.issues.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-            value: (err as any).input,
+            value: 'input' in err ? (err as { input: unknown }).input : undefined,
           }))
         )
       }
@@ -46,7 +46,7 @@ export function getData<T>(response: AxiosResponse, dataSchema?: z.ZodType<T>): 
     if (dataSchema) {
       try {
         return dataSchema.parse(responseData)
-      } catch (directError) {
+      } catch {
         throw new ApiError(
           'INVALID_RESPONSE_FORMAT',
           'Response does not match expected format',
@@ -86,7 +86,7 @@ export function getData<T>(response: AxiosResponse, dataSchema?: z.ZodType<T>): 
           error.issues.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-            value: (err as any).input,
+            value: 'input' in err ? (err as { input: unknown }).input : undefined,
           }))
         )
       }
@@ -175,7 +175,18 @@ export async function getRaw(
   return await apiClient.get(url, config)
 }
 
-
+/**
+ * Health check endpoint
+ */
+export async function checkHealth(): Promise<{ status: string; message: string }> {
+  try {
+    const response = await apiClient.get('/healthz')
+    return response.data
+  } catch {
+    // Return a default health response if endpoint fails
+    return { status: 'unknown', message: 'Health check failed' }
+  }
+}
 
 // Export the client for direct access when needed
 export { apiClient }

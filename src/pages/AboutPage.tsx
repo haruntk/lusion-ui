@@ -59,7 +59,13 @@ export function AboutPage() {
       <motion.section variants={itemVariants} className="text-center py-16">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            About <span className="bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">Lusion</span>
+            About <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold" 
+                        style={{ 
+                          WebkitBackgroundClip: 'text', 
+                          WebkitTextFillColor: 'transparent',
+                          backgroundImage: 'linear-gradient(to right, rgb(37 99 235), rgb(147 51 234))',
+                          fallbacks: [{ color: 'rgb(37 99 235)' }]
+                        }}>Lusion</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
             We're revolutionizing the dining experience through cutting-edge augmented reality technology, 

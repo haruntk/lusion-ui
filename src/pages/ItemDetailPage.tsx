@@ -1,19 +1,19 @@
-import * as React from "react"
 import { useParams, Link } from "react-router-dom"
 import { motion } from "framer-motion"
+import { useState } from "react"
 import { 
   ArrowLeft, 
   QrCode, 
   Smartphone, 
-  Eye, 
   Download,
   Share2,
   Copy,
-  ExternalLink,
   Clock,
   RefreshCw,
   Sparkles,
-  Package
+  Package,
+  ChevronDown,
+  ChevronUp
 } from "lucide-react"
 import { 
   Button, 
@@ -45,7 +45,7 @@ const itemVariants = {
     y: 0,
     opacity: 1,
     transition: {
-      type: "spring",
+      type: "spring" as const,
       stiffness: 300,
       damping: 24
     }
@@ -55,6 +55,21 @@ const itemVariants = {
 export function ItemDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { toast } = useToast()
+  
+  // Yerel state'i tanımla
+  interface LoadingState {
+    downloadLoading: boolean;
+    shareLoading: boolean;
+    copyLoading: boolean;
+  }
+  
+  const [state, setState] = useState<LoadingState>({
+    downloadLoading: false,
+    shareLoading: false,
+    copyLoading: false
+  })
+  
+  const [isModelDetailsExpanded, setIsModelDetailsExpanded] = useState<boolean>(false)
   
   // Use enhanced hooks with proper error handling
   const { 
@@ -79,7 +94,6 @@ export function ItemDetailPage() {
     download: downloadQr,
     share: shareQr,
     copyToClipboard,
-    getUrls,
     canShare,
     canCopy,
     refetch: refetchQr
@@ -87,20 +101,17 @@ export function ItemDetailPage() {
     itemId: id,
     enabled: !!id,
     includeAnalytics: true,
-    autoGenerate: false
+    autoGenerate: true // QR kodu otomatik olarak oluştur
   })
 
   const {
     deviceInfo,
-    isSupported: arSupported,
-    canStartAR,
-    generateLaunchUrl,
     loading: arLoading,
-    error: arError
+    error: arError,
+    startAr
   } = useArSession({
     itemId: id,
-    enabled: !!id,
-    autoDetectDevice: true
+    enabled: !!id
   })
 
   // Handle loading state
@@ -147,13 +158,18 @@ export function ItemDetailPage() {
   // Handle actions
   const handleQrGenerate = async () => {
     try {
-      await generateQr()
+      console.log("Generating QR code for item:", id);
+      const result = await generateQr();
+      console.log("QR generation result:", result);
+      
       toast({
         variant: "success",
         title: "QR Code Generated",
         description: "QR code has been generated successfully",
       })
     } catch (error) {
+      console.error("QR generation error:", error);
+      
       toast({
         variant: "destructive",
         title: "Generation Failed",
@@ -164,50 +180,92 @@ export function ItemDetailPage() {
 
   const handleDownload = async () => {
     try {
-      await downloadQr(`${item.name}-qr.png`)
+      // Update loading state when download operation starts
+      setState((prev: LoadingState) => ({...prev, downloadLoading: true}));
+      
+      console.log("Starting QR download for:", item.name);
+      await downloadQr(`${item.name.replace(/\s+/g, '-').toLowerCase()}-qr.png`);
+      
       toast({
         variant: "success",
         title: "Downloaded",
         description: "QR code has been downloaded to your device",
-      })
+      });
     } catch (error) {
+      console.error("QR download error:", error);
       toast({
         variant: "destructive",
         title: "Download Failed",
-        description: error instanceof Error ? error.message : "Failed to download QR code",
-      })
+        description: error instanceof Error ? error.message : "An error occurred while downloading the QR code",
+      });
+    } finally {
+      // İşlem tamamlandığında loading state'ini güncelle
+      setState((prev: LoadingState) => ({...prev, downloadLoading: false}));
     }
   }
 
   const handleShare = async () => {
     try {
-      await shareQr(item.name)
+      setState((prev: LoadingState) => ({...prev, shareLoading: true}));
+      
+      await shareQr(item.name);
+      
       toast({
         variant: "success",
         title: "Shared",
         description: "AR experience link has been shared",
-      })
-    } catch {
+      });
+    } catch (error) {
+      console.log("Share error, trying clipboard fallback:", error);
+      
       // Try clipboard fallback
       try {
-        await copyToClipboard()
+        await copyToClipboard();
+        
         toast({
           variant: "success",
           title: "Copied to Clipboard",
-          description: "AR experience link has been copied",
-        })
-      } catch {
+          description: "AR experience link has been copied to clipboard",
+        });
+      } catch (clipError) {
+        console.error("Both share and clipboard failed:", clipError);
+        
         toast({
           variant: "destructive",
-          title: "Share Failed",
-          description: "Unable to share or copy the link",
-        })
+          title: "Sharing Failed",
+          description: "The link could not be shared or copied",
+        });
       }
+    } finally {
+      setState((prev: LoadingState) => ({...prev, shareLoading: false}));
+    }
+  }
+  
+  const handleCopy = async () => {
+    try {
+      setState((prev: LoadingState) => ({...prev, copyLoading: true}));
+      
+      await copyToClipboard();
+      
+      toast({
+        variant: "success",
+        title: "Copied",
+        description: "AR experience link has been copied to clipboard",
+      });
+    } catch (error) {
+      console.error("Copy to clipboard error:", error);
+      
+      toast({
+        variant: "destructive",
+        title: "Copy Failed",
+        description: "The link could not be copied to clipboard",
+      });
+    } finally {
+      setState((prev: LoadingState) => ({...prev, copyLoading: false}));
     }
   }
 
-  const arLaunchUrl = generateLaunchUrl(item.id)
-  const urls = getUrls()
+
 
   return (
     <motion.div
@@ -230,12 +288,20 @@ export function ItemDetailPage() {
         {/* Item Image & QR Code */}
         <div className="space-y-6">
           <motion.div variants={itemVariants}>
-            <div className="aspect-square bg-muted rounded-lg overflow-hidden">
+            <div className="aspect-[4/3] bg-muted rounded-xl overflow-hidden shadow-lg ring-1 ring-black/5 w-full max-w-2xl">
               <img
-                src={item.image}
+                src={`${item.image}&w=1200&h=900&q=95&fit=crop&crop=center`}
                 alt={item.name}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
                 loading="eager"
+                style={{ 
+                  imageRendering: 'crisp-edges',
+                  objectFit: 'contain',
+                  objectPosition: 'center',
+                  backgroundColor: '#f8f9fa'
+                }}
+                width="800"
+                height="600"
               />
             </div>
           </motion.div>
@@ -292,7 +358,8 @@ export function ItemDetailPage() {
                         <Button
                           size="sm"
                           onClick={handleDownload}
-                          loading={qrLoading}
+                          loading={state.downloadLoading}
+                          disabled={state.downloadLoading}
                           leftIcon={<Download className="h-4 w-4" />}
                         >
                           Download
@@ -303,6 +370,8 @@ export function ItemDetailPage() {
                             size="sm"
                             variant="outline"
                             onClick={handleShare}
+                            loading={state.shareLoading}
+                            disabled={state.shareLoading}
                             leftIcon={<Share2 className="h-4 w-4" />}
                           >
                             Share
@@ -313,7 +382,9 @@ export function ItemDetailPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={copyToClipboard}
+                            onClick={handleCopy}
+                            loading={state.copyLoading}
+                            disabled={state.copyLoading}
                             leftIcon={<Copy className="h-4 w-4" />}
                           >
                             Copy Link
@@ -340,13 +411,19 @@ export function ItemDetailPage() {
 
                   {/* QR Analytics */}
                   {qrAnalytics && (
-                    <div className="text-center space-y-1">
+                    <div className="text-center space-y-1 mt-2">
                       <p className="text-xs text-muted-foreground">
-                        Scanned {qrAnalytics.totalScans} times
+                        Scans: {qrAnalytics.totalScans || 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        Unique scans: {qrAnalytics.uniqueScans || 0}
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        AR launches: {qrAnalytics.arLaunches || 0}
                       </p>
                       {qrAnalytics.conversionRate > 0 && (
                         <p className="text-xs text-muted-foreground">
-                          {Math.round(qrAnalytics.conversionRate * 100)}% conversion rate
+                          Conversion rate: {Math.round((qrAnalytics.conversionRate || 0) * 100)}%
                         </p>
                       )}
                     </div>
@@ -359,10 +436,18 @@ export function ItemDetailPage() {
           {/* 3D Model Info */}
           <motion.div variants={itemVariants}>
             <Card>
-              <CardHeader>
-                <CardTitle>3D Model Details</CardTitle>
+              <CardHeader className="cursor-pointer" onClick={() => setIsModelDetailsExpanded(!isModelDetailsExpanded)}>
+                <CardTitle className="flex items-center justify-between">
+                  <span>3D Model Details</span>
+                  {isModelDetailsExpanded ? (
+                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                  ) : (
+                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                  )}
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
+              {isModelDetailsExpanded && (
+                <CardContent className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Format:</span>
                   <span className="font-medium">GLB</span>
@@ -387,20 +472,8 @@ export function ItemDetailPage() {
                     <Badge variant="outline" className="text-xs">Web</Badge>
                   </div>
                 </div>
-                
-                {/* Model URLs for debugging */}
-                {import.meta.env.DEV && (
-                  <details className="text-xs">
-                    <summary className="cursor-pointer text-muted-foreground">Debug URLs</summary>
-                    <div className="mt-2 space-y-1 font-mono text-xs">
-                      <p>Model: {item.model}</p>
-                      {item.model_ios && <p>iOS: {item.model_ios}</p>}
-                      <p>QR: {urls.qrUrl}</p>
-                      <p>AR Start: {urls.arStartUrl}</p>
-                    </div>
-                  </details>
-                )}
-              </CardContent>
+                </CardContent>
+              )}
             </Card>
           </motion.div>
         </div>
@@ -446,8 +519,8 @@ export function ItemDetailPage() {
                          'Desktop Browser'}
                       </span>
                     </div>
-                    <Badge variant={arSupported ? "success" : "outline"}>
-                      {arSupported ? "AR Supported" : "Limited AR"}
+                    <Badge variant="success">
+                      AR Experience Ready
                     </Badge>
                   </div>
                 )}
@@ -458,34 +531,12 @@ export function ItemDetailPage() {
                 
                 <div className="flex flex-col gap-3">
                   <Button 
-                    className="gap-2" 
-                    asChild
-                    disabled={!canStartAR}
+                    className="gap-2 w-full" 
+                    onClick={startAr}
+                    size="lg"
                   >
-                    <a
-                      href={arLaunchUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Smartphone className="h-4 w-4" />
-                      {deviceInfo?.isIOS ? 'Open AR Quick Look' : 
-                       deviceInfo?.isAndroid ? 'Open Scene Viewer' : 
-                       'Open AR View'}
-                    </a>
-                  </Button>
-                  
-                  <Button variant="outline" className="gap-2" asChild>
-                    <Link to={`/ar/${item.id}`}>
-                      <Eye className="h-4 w-4" />
-                      Web AR Preview
-                    </Link>
-                  </Button>
-
-                  <Button variant="outline" className="gap-2" asChild>
-                    <Link to={`/model-viewer?item_id=${item.id}`}>
-                      <ExternalLink className="h-4 w-4" />
-                      3D Model Viewer
-                    </Link>
+                    <Smartphone className="h-5 w-5" />
+                    Start AR Experience
                   </Button>
                 </div>
                 

@@ -1,4 +1,5 @@
 import * as React from "react"
+import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { AlertTriangle, RefreshCw, Home, Bug } from "lucide-react"
 import { Button } from "@/components/ui"
@@ -147,11 +148,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Button asChild variant="outline" size="lg" className="gap-2">
-                  <Link to="/">
-                    <Home className="h-4 w-4" aria-hidden="true" />
-                    Go Home
-                  </Link>
+                <Button 
+                  variant="outline" 
+                  size="lg" 
+                  className="gap-2"
+                  onClick={() => window.location.href = '/'}
+                >
+                  <Home className="h-4 w-4" aria-hidden="true" />
+                  Go Home
                 </Button>
               </motion.div>
             </motion.div>

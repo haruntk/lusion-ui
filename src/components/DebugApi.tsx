@@ -1,21 +1,33 @@
 import React from 'react'
 import { itemsApi, checkHealth } from '@/api'
+import { type Item } from '@/types'
+import { Button, Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
+import { logger } from '@/utils'
+
+interface TestResult {
+  success: boolean
+  data?: Item[] | { status: string; message: string } | unknown
+  error?: string
+}
 
 export function DebugApi() {
-  const [itemsResult, setItemsResult] = React.useState<any>(null)
-  const [healthResult, setHealthResult] = React.useState<any>(null)
+  const [itemsResult, setItemsResult] = React.useState<TestResult | null>(null)
+  const [healthResult, setHealthResult] = React.useState<TestResult | null>(null)
   const [loading, setLoading] = React.useState(false)
 
   const testItems = async () => {
     setLoading(true)
     try {
-      console.log('Testing /api/items...')
+      logger.debug('Testing /api/items...')
       const items = await itemsApi.getAll()
-      console.log('Items response:', items)
+      logger.debug('Items response received', { count: items.length })
       setItemsResult({ success: true, data: items })
     } catch (error) {
-      console.error('Items error:', error)
-      setItemsResult({ success: false, error: error.message })
+      logger.error('Items API test failed', { error })
+      setItemsResult({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      })
     }
     setLoading(false)
   }
@@ -23,57 +35,70 @@ export function DebugApi() {
   const testHealth = async () => {
     setLoading(true)
     try {
-      console.log('Testing /healthz...')
+      logger.debug('Testing /healthz...')
       const health = await checkHealth()
-      console.log('Health response:', health)
+      logger.debug('Health response received', { status: health.status })
       setHealthResult({ success: true, data: health })
     } catch (error) {
-      console.error('Health error:', error)
-      setHealthResult({ success: false, error: error.message })
+      logger.error('Health API test failed', { error })
+      setHealthResult({ 
+        success: false, 
+        error: error instanceof Error ? error.message : 'Unknown error' 
+      })
     }
     setLoading(false)
   }
 
   return (
-    <div className="p-6 space-y-4">
-      <h2 className="text-2xl font-bold">API Debug Panel</h2>
-      
-      <div className="space-x-4">
-        <button 
+    <div className="space-y-6">
+      <div className="flex gap-4">
+        <Button 
           onClick={testItems}
           disabled={loading}
-          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50"
+          loading={loading}
+          variant="default"
         >
           Test Items API
-        </button>
+        </Button>
         
-        <button 
+        <Button 
           onClick={testHealth}
           disabled={loading}
-          className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:opacity-50"
+          loading={loading}
+          variant="secondary"
         >
           Test Health API
-        </button>
+        </Button>
       </div>
 
-      {loading && <p>Loading...</p>}
-
       {itemsResult && (
-        <div className="p-4 border rounded">
-          <h3 className="font-bold">Items API Result:</h3>
-          <pre className="mt-2 text-sm overflow-auto">
-            {JSON.stringify(itemsResult, null, 2)}
-          </pre>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className={`text-lg ${itemsResult.success ? 'text-green-700' : 'text-red-700'}`}>
+              Items API Result: {itemsResult.success ? 'Success' : 'Failed'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="text-sm bg-muted p-3 rounded overflow-auto max-h-64">
+              {JSON.stringify(itemsResult, null, 2)}
+            </pre>
+          </CardContent>
+        </Card>
       )}
 
       {healthResult && (
-        <div className="p-4 border rounded">
-          <h3 className="font-bold">Health API Result:</h3>
-          <pre className="mt-2 text-sm overflow-auto">
-            {JSON.stringify(healthResult, null, 2)}
-          </pre>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className={`text-lg ${healthResult.success ? 'text-green-700' : 'text-red-700'}`}>
+              Health API Result: {healthResult.success ? 'Success' : 'Failed'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <pre className="text-sm bg-muted p-3 rounded overflow-auto max-h-64">
+              {JSON.stringify(healthResult, null, 2)}
+            </pre>
+          </CardContent>
+        </Card>
       )}
     </div>
   )

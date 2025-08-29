@@ -4,6 +4,7 @@ export { useItem } from './useItem'
 export { useArSession } from './useArSession'
 export { useQr } from './useQr'
 export { useToast, ToastContext } from './useToast'
+export { useTheme } from './useTheme'
 
 // Hook types for external usage (commented out until interfaces are properly exported)
 // export type { UseItemsReturn, UseItemsOptions } from './useItems'

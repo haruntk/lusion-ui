@@ -22,6 +22,7 @@ import {
 import { ErrorState, EmptyState } from "@/components/common"
 import { useItems } from "@/hooks"
 import { Link } from "react-router-dom"
+import { logger } from "@/utils"
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -76,15 +77,33 @@ export function QrCodesPage() {
     return searchQuery.trim() ? searchItems(searchQuery.trim()) : items
   }, [items, searchQuery, searchItems])
 
-  const handleDownloadQr = (itemId: string, itemName: string) => {
-    // Create download link for QR code
-    const qrUrl = `/qr/${itemId}`
-    const link = document.createElement('a')
-    link.href = qrUrl
-    link.download = `${itemName}-qr.png`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+  const handleDownloadQr = async (itemId: string, itemName: string) => {
+    try {
+      // Generate QR code URL for the AR experience
+      const arUrl = `${window.location.origin}/ar-view?item_id=${itemId}`
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(arUrl)}`
+      
+      // Fetch the QR code image
+      const response = await fetch(qrUrl)
+      const blob = await response.blob()
+      
+      // Create download link
+      const link = document.createElement('a')
+      link.href = URL.createObjectURL(blob)
+      link.download = `${itemName.replace(/[^a-zA-Z0-9]/g, '_')}-QR.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Clean up
+      URL.revokeObjectURL(link.href)
+    } catch (error) {
+      logger.error('Failed to download QR code', { error, itemId })
+      // Fallback to opening QR code in new tab
+      const arUrl = `${window.location.origin}/ar-view?item_id=${itemId}`
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(arUrl)}`
+      window.open(qrUrl, '_blank')
+    }
   }
 
   if (loading) {
@@ -233,10 +252,15 @@ export function QrCodesPage() {
                 <CardHeader className="text-center">
                   <div className="mx-auto mb-4 p-4 bg-muted rounded-lg">
                     <img
-                      src={`/qr/${item.id}`}
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent(`${window.location.origin}/ar-view?item_id=${item.id}`)}`}
                       alt={`QR Code for ${item.name}`}
                       className="w-32 h-32 mx-auto"
                       loading="lazy"
+                      onError={(e) => {
+                        // Fallback to placeholder if QR service fails
+                        const target = e.target as HTMLImageElement;
+                        target.src = `https://via.placeholder.com/128x128/f3f4f6/6b7280?text=QR`;
+                      }}
                     />
                   </div>
                   <CardTitle className="text-lg">{item.name}</CardTitle>
@@ -263,14 +287,22 @@ export function QrCodesPage() {
                       size="sm"
                       variant="outline"
                       className="flex-1 gap-1"
-                      onClick={() => {
-                        if (navigator.share) {
-                          navigator.share({
-                            title: `AR View: ${item.name}`,
-                            url: `/ar-start/${item.id}`
-                          })
-                        } else {
-                          navigator.clipboard.writeText(`${window.location.origin}/ar-start/${item.id}`)
+                      onClick={async () => {
+                        const arUrl = `${window.location.origin}/ar-view?item_id=${item.id}`
+                        try {
+                          if (navigator.share) {
+                            await navigator.share({
+                              title: `AR View: ${item.name}`,
+                              text: `Check out ${item.name} in AR!`,
+                              url: arUrl
+                            })
+                          } else {
+                            await navigator.clipboard.writeText(arUrl)
+                            // Could add a toast notification here
+                            logger.info('AR URL copied to clipboard')
+                          }
+                        } catch (error) {
+                          logger.error('Failed to share AR URL', { error, itemId: item.id })
                         }
                       }}
                     >

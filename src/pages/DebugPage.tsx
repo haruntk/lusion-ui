@@ -2,9 +2,33 @@ import * as React from "react"
 import { Button, Card, CardContent, CardHeader, CardTitle } from "@/components/ui"
 import { apiClient } from "@/api"
 import { DebugApi } from "@/components/DebugApi"
+import { ArModelTest } from "@/components/ar"
+
+interface AxiosErrorLike {
+  response?: {
+    status: number
+    data: unknown
+  }
+  message: string
+}
+
+function isAxiosError(error: unknown): error is AxiosErrorLike {
+  return error instanceof Error && 'response' in error
+}
+
+interface DebugResult {
+  endpoint: string
+  description: string
+  status: 'success' | 'error'
+  statusCode?: number
+  data?: unknown
+  error?: string
+  duration: string
+  timestamp: string
+}
 
 export function DebugPage() {
-  const [results, setResults] = React.useState<any[]>([])
+  const [results, setResults] = React.useState<DebugResult[]>([])
   const [loading, setLoading] = React.useState(false)
 
   const testEndpoint = async (endpoint: string, description: string) => {
@@ -16,7 +40,7 @@ export function DebugPage() {
       const response = await apiClient.get(endpoint)
       const duration = Date.now() - startTime
       
-      const result = {
+      const result: DebugResult = {
         endpoint,
         description,
         status: 'success',
@@ -28,16 +52,16 @@ export function DebugPage() {
       
       console.log(`✅ ${endpoint} success:`, result)
       setResults(prev => [...prev, result])
-    } catch (error: any) {
+    } catch (error: unknown) {
       const duration = Date.now() - startTime
       
-      const result = {
+      const result: DebugResult = {
         endpoint,
         description,
         status: 'error',
-        statusCode: error.response?.status || 'Network Error',
-        error: error.message,
-        data: error.response?.data,
+        statusCode: isAxiosError(error) ? error.response?.status : undefined,
+        error: error instanceof Error ? error.message : 'Unknown error',
+        data: isAxiosError(error) ? error.response?.data : undefined,
         duration: `${duration}ms`,
         timestamp: new Date().toISOString()
       }
@@ -58,7 +82,17 @@ export function DebugPage() {
 
   return (
     <div className="container mx-auto px-4 py-8 space-y-8">
-      {/* New Debug API Component */}
+      {/* AR Model Test */}
+      <Card className="max-w-4xl mx-auto mb-6">
+        <CardHeader>
+          <CardTitle>AR Model API Test</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ArModelTest itemId="kebap_ar" />
+        </CardContent>
+      </Card>
+
+      {/* Quick API Test */}
       <Card className="max-w-4xl mx-auto">
         <CardHeader>
           <CardTitle>Quick API Test</CardTitle>

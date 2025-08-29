@@ -31,24 +31,70 @@ const pageTransition = {
 
 export function Layout() {
   const location = useLocation()
+  const [isNavigating, setIsNavigating] = React.useState(false)
+
+  // Handle navigation state changes
+  React.useEffect(() => {
+    // Skip navigation state for home page to avoid loading issues
+    if (location.pathname === '/') {
+      setIsNavigating(false)
+      return
+    }
+    
+    setIsNavigating(true)
+    const timer = setTimeout(() => {
+      setIsNavigating(false)
+    }, 200)
+
+    return () => clearTimeout(timer)
+  }, [location.pathname])
+
+  // Debug navigation in development
+  React.useEffect(() => {
+    if (import.meta.env.DEV) {
+      // Navigation tracking is handled by RouteDebugger component
+      // No need for additional logging here
+    }
+  }, [location.pathname])
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Navbar />
       
-      <main className="flex-1 relative overflow-hidden">
-        <AnimatePresence mode="wait">
+      <main className="flex-1 relative">
+        <AnimatePresence mode="wait" onExitComplete={() => setIsNavigating(false)}>
           <motion.div
             key={location.pathname}
-            initial="initial"
+            initial={location.pathname === '/' ? "in" : "initial"}
             animate="in"
             exit="out"
             variants={pageVariants}
             transition={pageTransition}
-            className="w-full"
+            className="w-full min-h-full"
           >
+            {/* Fallback loading state during navigation - skip for home page */}
+            {isNavigating && location.pathname !== '/' && (
+              <div className="absolute inset-0 flex items-center justify-center bg-background/80 z-10">
+                <div className="text-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                  <p className="text-muted-foreground">Loading...</p>
+                </div>
+              </div>
+            )}
+            
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <Outlet />
+              <React.Suspense 
+                fallback={
+                  <div className="flex items-center justify-center min-h-[50vh]">
+                    <div className="text-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
+                      <p className="text-muted-foreground">Loading page...</p>
+                    </div>
+                  </div>
+                }
+              >
+                <Outlet />
+              </React.Suspense>
             </div>
           </motion.div>
         </AnimatePresence>

@@ -1,5 +1,6 @@
 import * as React from "react"
 import { motion } from "framer-motion"
+import { NavigationTest } from "@/components/NavigationTest"
 import { 
   Button, 
   Card, 
@@ -10,6 +11,7 @@ import {
   Input,
   Spinner,
   Badge,
+  ThemeToggle,
   useToast
 } from "@/components/ui"
 import { 
@@ -92,14 +94,29 @@ export function UiDemoPage() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
           <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-purple-600 bg-clip-text text-transparent">
             UI Components Demo
           </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto mb-6">
             Explore our accessible, responsive UI component library with Framer Motion animations
           </p>
+          
+          {/* Theme Toggle Showcase */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            className="flex justify-center"
+          >
+            <Card className="inline-block p-4">
+              <div className="text-center space-y-3">
+                <p className="text-sm font-medium text-muted-foreground">Try Different Themes</p>
+                <ThemeToggle variant="default" />
+              </div>
+            </Card>
+          </motion.div>
         </motion.div>
 
         <motion.div
@@ -378,6 +395,16 @@ export function UiDemoPage() {
               </CardContent>
             </Card>
           </motion.div>
+        </motion.div>
+
+        {/* Navigation Testing Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-12"
+        >
+          <NavigationTest />
         </motion.div>
 
         {/* Footer Note */}

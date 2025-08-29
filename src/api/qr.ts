@@ -1,9 +1,6 @@
-import { z } from 'zod'
 import { apiClient } from './client'
 import { 
-  QrGenerationRequestSchema,
   QrResponseSchema,
-  QrCodeMetadataSchema,
   QrScanEventSchema,
   validateQrGenerationRequest,
   type QrGenerationRequest,
@@ -19,70 +16,109 @@ import {
  */
 export const qrApi = {
   /**
-   * Generate QR code for an item (uses existing Flask endpoint)
-   * GET /qr/:itemId - Returns PNG image directly from Flask
+   * Generate QR code for an item
+   * POST /qr/generate/:itemId - Enhanced API endpoint
+   * GET /qr/generate/:itemId - Also supports GET with query params
    */
   async generate(request: QrGenerationRequest): Promise<QrResponse> {
     const validatedRequest = validateQrGenerationRequest(request)
     
-    // Flask endpoint: GET /qr/<model_id> returns PNG image directly
-    const qrUrl = this.getQrCodeUrl(validatedRequest.itemId, {
-      size: validatedRequest.size,
-      format: validatedRequest.format
-    })
-    
-    const response: QrResponse = {
-      success: true,
-      data: {
-        qrCodeUrl: qrUrl,
-        arStartUrl: `/ar-start/${validatedRequest.itemId}`,  // Flask endpoint
-        arViewUrl: `/ar-view/${validatedRequest.itemId}`,    // Flask endpoint  
-        itemId: validatedRequest.itemId,
-        generatedAt: new Date().toISOString(),
-        size: validatedRequest.size,
+    try {
+      // Use the updated API endpoint
+      const apiResponse = await apiClient.post(`/qr/generate/${validatedRequest.itemId}`, {
         format: validatedRequest.format,
-      },
-      message: 'QR code generated successfully'
+        size: validatedRequest.size,
+        border: 4,
+        error_correction: validatedRequest.errorCorrection,
+      })
+
+      if (apiResponse.data) {
+                // Create full URLs
+        const baseUrl = window.location.origin;
+        const qrCodeUrl = apiResponse.data.qr_data.startsWith('data:') 
+          ? apiResponse.data.qr_data  // Already a complete data URL
+          : `${baseUrl}${apiResponse.data.qr_data}`;
+        
+        const response: QrResponse = {
+          success: true,
+          data: {
+            qrCodeUrl: qrCodeUrl,
+            arStartUrl: `${baseUrl}/ar-start/${validatedRequest.itemId}`,
+            arViewUrl: `${baseUrl}/#/ar/${validatedRequest.itemId}`,
+            itemId: validatedRequest.itemId,
+            generatedAt: new Date().toISOString(),
+            size: validatedRequest.size,
+            format: apiResponse.data.format,
+            downloadUrl: apiResponse.data.image_url ? `${baseUrl}${apiResponse.data.image_url}` : undefined
+          },
+          message: 'QR code generated successfully'
+        }
+        
+        return QrResponseSchema.parse(response)
+      }
+      
+      throw new Error('Invalid API response format')
+    } catch (error) {
+      console.error('Error generating QR code:', error)
+      
+      // Fallback to direct image URL
+      const baseUrl = window.location.origin;
+      const qrUrl = `${baseUrl}${this.getQrCodeUrl(validatedRequest.itemId)}`;
+      
+      const response: QrResponse = {
+        success: true,
+        data: {
+          qrCodeUrl: qrUrl,
+          arStartUrl: `${baseUrl}/ar-start/${validatedRequest.itemId}`,
+          arViewUrl: `${baseUrl}/#/ar/${validatedRequest.itemId}`,
+          itemId: validatedRequest.itemId,
+          generatedAt: new Date().toISOString(),
+          size: validatedRequest.size,
+          format: validatedRequest.format,
+        },
+        message: 'QR code generated via direct image URL'
+      }
+      
+      return QrResponseSchema.parse(response)
     }
-    
-    return QrResponseSchema.parse(response)
   },
 
   /**
-   * Get QR code for an item (uses Flask endpoint)
+   * Get QR code for an item (uses updated API endpoint)
    * GET /qr/:itemId - Returns PNG image directly
    */
-  async getQrCode(itemId: string, options?: {
-    size?: number
-    format?: 'png' | 'jpg' | 'svg'
-  }): Promise<Blob> {
+  async getQrCode(itemId: string): Promise<Blob> {
     if (!itemId) {
       throw new Error('Item ID is required')
     }
 
-    // Flask endpoint doesn't support query parameters for size/format
-    // Just call the /qr/<model_id> endpoint directly  
-    const response = await apiClient.get(`/qr/${itemId}`, {
-      responseType: 'blob'
-    })
-    
-    return response.data
+    try {
+      // Try the direct endpoint for blob response (image)
+      const response = await apiClient.get(`/qr/${itemId}`, {
+        responseType: 'blob',
+        headers: {
+          'Accept': 'image/png'
+        }
+      })
+      
+      return response.data
+    } catch (error) {
+      console.error('Error fetching QR code image:', error)
+      throw new Error('Failed to fetch QR code image')
+    }
   },
 
   /**
-   * Get QR code URL (for img src) - points to Flask endpoint
+   * Get QR code URL (for img src)
    */
-  getQrCodeUrl(itemId: string, options?: {
-    size?: number
-    format?: 'png' | 'jpg' | 'svg'
-  }): string {
+  getQrCodeUrl(itemId: string): string {
     if (!itemId) {
       throw new Error('Item ID is required')
     }
 
-    // Flask endpoint: /qr/<model_id> (not under /api prefix)
-    // Backend doesn't support size/format parameters
-    return `/qr/${itemId}`
+    // Return the direct image URL endpoint path with origin
+    const baseUrl = window.location.origin
+    return `${baseUrl}/qr/${itemId}`
   },
 
   /**
@@ -99,50 +135,136 @@ export const qrApi = {
   },
 
   /**
-   * Track QR code scan event (placeholder - logs to console)
+   * Track QR code scan event (uses new API with fallback)
    */
-  async trackScan(event: QrScanEvent): Promise<{ success: boolean }> {
+  async trackScan(event: QrScanEvent): Promise<{ success: boolean; scanId?: string }> {
     const validatedEvent = QrScanEventSchema.parse(event)
     
-    // For now, just log to console since backend doesn't have scan tracking
-    console.log('QR Scan Event:', validatedEvent)
+    try {
+      // Try new tracking API endpoint
+      const response = await apiClient.post(`/qr/track/${validatedEvent.itemId}`, {
+        scanned_at: validatedEvent.scannedAt,
+        user_agent: navigator.userAgent,
+        referrer: document.referrer
+      })
+
+      if (response.data && response.data.success) {
+        return { 
+          success: true, 
+          scanId: response.data.scan_id 
+        }
+      }
+    } catch (error) {
+      console.warn('QR tracking API not available, using local tracking:', error)
+    }
+
+    // Fallback to local console logging
+    console.log('QR Scan Event (local):', validatedEvent)
     
-    return { success: true }
+    return { 
+      success: true, 
+      scanId: `local_${validatedEvent.itemId}_${Date.now()}` 
+    }
   },
 
   /**
-   * Get QR code analytics (placeholder)
+   * Get QR code analytics (uses new API with fallback)
    */
-  async getAnalytics(itemId: string, dateRange?: {
-    from: string
-    to: string
-  }): Promise<QrAnalytics | null> {
+  async getAnalytics(itemId: string): Promise<QrAnalytics | null> {
     if (!itemId) {
       throw new Error('Item ID is required')
     }
 
-    // Placeholder data since backend doesn't have analytics
-    return null
+    try {
+      // Try new analytics API endpoint
+      const response = await apiClient.get(`/qr/analytics/${itemId}`)
+      
+      if (response.data) {
+        // Merge with default values
+        const analyticsData = {
+          itemId: itemId,
+          totalScans: response.data.totalScans || 0,
+          uniqueScans: response.data.uniqueScans || 0,
+          arLaunches: response.data.arLaunches || 0,
+          conversionRate: response.data.conversionRate || 0,
+          topDevices: response.data.topDevices || [],
+          scansByDate: response.data.scansByDate || [],
+          peakHours: response.data.peakHours || []
+        };
+        
+        return analyticsData;
+      }
+    } catch (error) {
+      console.warn('QR analytics API not available:', error)
+    }
+
+    // Return default analytics data if API is unavailable or error occurs
+    return {
+      itemId: itemId,
+      totalScans: 0,
+      uniqueScans: 0,
+      arLaunches: 0,
+      conversionRate: 0,
+      topDevices: [],
+      scansByDate: [],
+      peakHours: []
+    };
   },
 
   /**
    * Download QR code
    */
-  async download(itemId: string, filename?: string, options?: {
-    size?: number
-    format?: 'png' | 'jpg' | 'svg'
-  }): Promise<void> {
-    const blob = await this.getQrCode(itemId, options)
-    
-    // Create download link
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = filename || `qr-${itemId}.${options?.format || 'png'}`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+  async download(itemId: string, filename?: string): Promise<void> {
+    try {
+      console.log(`Downloading QR code for item: ${itemId}`);
+      
+      // First, try to get the QR code as base64
+      const qrResponse = await this.generate({
+        itemId,
+        size: 800, // Larger size
+        format: 'png',
+        errorCorrection: 'H', // High error correction
+      });
+      
+      if (qrResponse && qrResponse.data && qrResponse.data.qrCodeUrl) {
+        console.log('QR code generated successfully, attempting download');
+        
+        // If base64 data URL exists, create direct download link
+        if (qrResponse.data.qrCodeUrl.startsWith('data:')) {
+          const link = document.createElement('a');
+          link.href = qrResponse.data.qrCodeUrl;
+          link.download = filename || `qr-${itemId}.png`;
+          document.body.appendChild(link);
+          link.click();
+          setTimeout(() => {
+            document.body.removeChild(link);
+          }, 100);
+          return;
+        }
+      }
+      
+      // Fallback: Blob method
+      console.log('Using fallback blob method for download');
+      const blob = await this.getQrCode(itemId);
+      
+      // Create download link
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename || `qr-${itemId}.png`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Delay cleanup
+      setTimeout(() => {
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 100);
+    } catch (error) {
+      console.error('Download error:', error);
+      throw new Error('An error occurred while downloading the QR code. Please try again.');
+    }
   },
 
   /**
@@ -188,7 +310,7 @@ export const qrApi = {
         isValid: false,
         error: 'QR code does not contain a valid AR item link'
       }
-    } catch (error) {
+    } catch {
       return {
         isValid: false,
         error: 'Invalid QR code data - not a valid URL'
@@ -215,6 +337,7 @@ export const qrHelpers = {
    * Get AR start URL for an item
    */
   getArStartUrl(itemId: string): string {
+    if (!itemId) return '';
     const baseUrl = window.location.origin
     return `${baseUrl}/ar-start/${itemId}`
   },
@@ -223,8 +346,10 @@ export const qrHelpers = {
    * Get AR view URL for an item
    */
   getArViewUrl(itemId: string): string {
+    if (!itemId) return '';
     const baseUrl = window.location.origin
-    return `${baseUrl}/ar-view?item_id=${itemId}`
+    // Redirect directly to AR view endpoint
+    return `${baseUrl}/#/ar/${itemId}`
   },
 
   /**
@@ -237,16 +362,11 @@ export const qrHelpers = {
 
     const arUrl = this.getArStartUrl(itemId)
     
-    try {
-      await navigator.share({
-        title: itemName ? `AR View: ${itemName}` : 'AR Experience',
-        text: 'Check out this AR experience!',
-        url: arUrl,
-      })
-    } catch (error) {
-      // User cancelled or error occurred
-      throw error
-    }
+    await navigator.share({
+      title: itemName ? `AR View: ${itemName}` : 'AR Experience',
+      text: 'Check out this AR experience!',
+      url: arUrl,
+    })
   },
 
   /**
@@ -257,7 +377,7 @@ export const qrHelpers = {
     
     try {
       await navigator.clipboard.writeText(arUrl)
-    } catch (error) {
+    } catch {
       // Fallback for older browsers
       const textArea = document.createElement('textarea')
       textArea.value = arUrl

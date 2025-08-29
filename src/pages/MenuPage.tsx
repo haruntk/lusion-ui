@@ -68,11 +68,6 @@ export function MenuPage() {
     refetchInterval: undefined, // No auto-refresh
   }), [])
 
-  // Debug logging
-  React.useEffect(() => {
-    console.log('MenuPage mounted, itemsOptions:', itemsOptions)
-  }, [itemsOptions])
-
   const { 
     data: items, 
     categories, 

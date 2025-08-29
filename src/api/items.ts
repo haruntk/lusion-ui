@@ -2,11 +2,7 @@ import { z } from 'zod'
 import { apiClient } from './client'
 import { 
   ItemSchema, 
-  ItemDetailSchema,
-  CategorySchema,
   ItemSearchParamsSchema,
-  validateItem,
-  validateItemDetail,
   type Item, 
   type ItemDetail,
   type Category,
@@ -15,7 +11,6 @@ import {
 
 // Response schemas for API validation
 const ItemsListResponseSchema = z.array(ItemSchema)
-const CategoriesListResponseSchema = z.array(CategorySchema)
 
 /**
  * Items API module
@@ -31,43 +26,41 @@ export const itemsApi = {
     const validatedParams = params ? ItemSearchParamsSchema.parse(params) : undefined
     
     try {
-      // Flask backend only supports /api/items endpoint - returns data directly as array
-      console.log('Fetching items from /api/items')
-      const response = await apiClient.get('/items')
-      console.log('Raw response from Flask:', response.data)
-      
-      // Flask returns items array directly, not wrapped in response object
-      const items = ItemsListResponseSchema.parse(response.data)
-      console.log('Validated items:', items)
-      
-      // Apply client-side filtering if parameters provided
-      let filteredItems = items
-      if (validatedParams) {
-        if (validatedParams.category) {
-          filteredItems = filteredItems.filter(item => 
-            item.category.toLowerCase() === validatedParams.category!.toLowerCase()
-          )
-        }
-        if (validatedParams.search) {
-          const query = validatedParams.search.toLowerCase()
-          filteredItems = filteredItems.filter(item =>
-            item.name.toLowerCase().includes(query) ||
-            item.description.toLowerCase().includes(query) ||
-            item.category.toLowerCase().includes(query)
-          )
-        }
+      // Flask API now properly supports query parameters
+      const queryParams: Record<string, string> = {}
+      if (validatedParams?.category) {
+        queryParams.category = validatedParams.category
+      }
+      if (validatedParams?.search) {
+        queryParams.search = validatedParams.search
       }
       
-      return filteredItems
+      // Use the proper API endpoint
+      const response = await apiClient.get('/items', {
+        params: queryParams
+      })
+      
+      // Check if Flask returned data
+      let items: Item[] = []
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        // Parse and validate the response
+        items = ItemsListResponseSchema.parse(response.data)
+      } else {
+        // Return empty array if no items from backend
+        items = []
+      }
+      
+      return items
     } catch (error) {
-      console.error('Error in itemsApi.getAll:', error)
-      throw error
+      console.error('Error fetching items:', error)
+      // Return empty array if API fails
+      return []
     }
   },
 
   /**
    * Get single item by ID
-   * Note: Backend doesn't have dedicated /api/items/:id endpoint, so we fetch all and filter
+   * GET /api/items/:id
    */
   async getById(id: string): Promise<ItemDetail | null> {
     if (!id || typeof id !== 'string') {
@@ -75,22 +68,32 @@ export const itemsApi = {
     }
 
     try {
-      // Backend doesn't support individual item API endpoints
-      // Use findById which fetches all items and filters client-side
-      return await this.findById(id)
+      // Use new dedicated API endpoint for items
+      const response = await apiClient.get(`items/${id}`)
+      if (response.data) {
+        return ItemSchema.parse(response.data)
+      }
+      return null
     } catch (error) {
       console.error(`Error fetching item ${id}:`, error)
-      throw error
+      // Fall back to findById as a backup strategy
+      return await this.findById(id)
     }
   },
 
   /**
-   * Find item by ID from all items list (current backend limitation workaround)
+   * Find item by ID from all items list (fallback method)
    */
   async findById(id: string): Promise<Item | null> {
-    const items = await this.getAll()
-    const item = items.find(item => item.id === id)
-    return item || null
+    try {
+      // Try the direct API endpoint first
+      return await this.getById(id)
+    } catch {
+      // Fall back to client-side filtering
+      const items = await this.getAll()
+      const item = items.find(item => item.id === id)
+      return item || null
+    }
   },
 
   /**
@@ -101,56 +104,113 @@ export const itemsApi = {
       throw new Error('Category is required and must be a string')
     }
 
-    // For now, filter client-side since backend doesn't support category filtering
-    const allItems = await this.getAll()
-    return allItems.filter(item => item.category === category)
+    try {
+      // Use query parameters for filtering via API
+      const response = await apiClient.get('/items', {
+        params: { category }
+      })
+      
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        return ItemsListResponseSchema.parse(response.data)
+      }
+      return []
+    } catch (error) {
+      console.error(`Error fetching items by category ${category}:`, error)
+      // Fall back to client-side filtering
+      const allItems = await this.getAll()
+      return allItems.filter(item => item.category.toLowerCase() === category.toLowerCase())
+    }
   },
 
   /**
    * Search items by text query
    */
-  async search(query: string, params?: Omit<ItemSearchParams, 'search'>): Promise<Item[]> {
+  async search(query: string): Promise<Item[]> {
     if (!query || typeof query !== 'string') {
       throw new Error('Search query is required and must be a string')
     }
 
-    // For now, search client-side since backend doesn't support text search
-    const allItems = await this.getAll()
-    const lowercaseQuery = query.toLowerCase().trim()
-    
-    return allItems.filter(item => 
-      item.name.toLowerCase().includes(lowercaseQuery) ||
-      item.description.toLowerCase().includes(lowercaseQuery) ||
-      item.category.toLowerCase().includes(lowercaseQuery)
-    )
+    try {
+      // Use query parameters for searching via API
+      const response = await apiClient.get('/items', {
+        params: { search: query }
+      })
+      
+      if (Array.isArray(response.data)) {
+        return ItemsListResponseSchema.parse(response.data)
+      }
+      return []
+    } catch (error) {
+      console.error(`Error searching items with query "${query}":`, error)
+      // Fall back to client-side search
+      const allItems = await this.getAll()
+      const lowercaseQuery = query.toLowerCase().trim()
+      
+      return allItems.filter(item => 
+        item.name.toLowerCase().includes(lowercaseQuery) ||
+        item.description.toLowerCase().includes(lowercaseQuery) ||
+        item.category.toLowerCase().includes(lowercaseQuery)
+      )
+    }
   },
 
   /**
    * Get all available categories
-   * Derived from items since backend doesn't have dedicated endpoint
+   * GET /api/categories
    */
   async getCategories(): Promise<Category[]> {
-    const items = await this.getAll()
-    
-    // Group items by category and count
-    const categoryMap = new Map<string, number>()
-    items.forEach(item => {
-      const count = categoryMap.get(item.category) || 0
-      categoryMap.set(item.category, count + 1)
-    })
-
-    // Convert to Category objects and sort
-    const categories: Category[] = Array.from(categoryMap.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => a.name.localeCompare(b.name))
-
-    return categories
+    try {
+      // Use the dedicated categories API endpoint
+      const response = await apiClient.get('/categories')
+      
+      if (Array.isArray(response.data) && response.data.length > 0) {
+        return response.data.map((cat: { name: string; count: number }) => ({
+          name: cat.name,
+          count: cat.count
+        }))
+      }
+      
+      // If empty response or error, fall back to client-side derivation
+      const items = await this.getAll()
+      
+      // Group items by category and count
+      const categoryMap = new Map<string, number>()
+      items.forEach(item => {
+        const count = categoryMap.get(item.category) || 0
+        categoryMap.set(item.category, count + 1)
+      })
+  
+      // Convert to Category objects and sort
+      const categories: Category[] = Array.from(categoryMap.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+  
+      return categories
+    } catch (error) {
+      console.error('Error fetching categories:', error)
+      // Fall back to client-side derivation
+      const items = await this.getAll()
+      
+      // Group items by category and count
+      const categoryMap = new Map<string, number>()
+      items.forEach(item => {
+        const count = categoryMap.get(item.category) || 0
+        categoryMap.set(item.category, count + 1)
+      })
+  
+      // Convert to Category objects and sort
+      const categories: Category[] = Array.from(categoryMap.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => a.name.localeCompare(b.name))
+  
+      return categories
+    }
   },
 
   /**
    * Get paginated items (when backend supports pagination)
    */
-  async getPaginated(page: number = 1, limit: number = 20, params?: Omit<ItemSearchParams, 'page' | 'limit'>): Promise<{
+  async getPaginated(page: number = 1, limit: number = 20): Promise<{
     items: Item[]
     pagination: {
       page: number
@@ -161,12 +221,6 @@ export const itemsApi = {
       hasPrevPage: boolean
     }
   }> {
-    const allParams: ItemSearchParams = {
-      ...params,
-      page: Math.max(1, page),
-      limit: Math.min(100, Math.max(1, limit))
-    }
-
     // For now, simulate pagination client-side since backend doesn't support it
     const allItems = await this.getAll()
     const startIndex = (page - 1) * limit
@@ -187,7 +241,9 @@ export const itemsApi = {
         hasPrevPage: page > 1
       }
     }
-  }
+  },
+
+
 }
 
 // Export individual functions for convenience

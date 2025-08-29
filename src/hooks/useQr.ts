@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { qrApi, ApiError, ValidationApiError } from '@/api'
+import { qrApi, qrHelpers, ApiError, ValidationApiError } from '@/api'
 import { 
   QrResponseSchema,
   QrCodeMetadataSchema,
@@ -70,36 +70,44 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
       return
     }
 
+    // Eğer son 10 saniye içinde veri alındıysa, tekrar istek atmayı engelle
+    if (state.lastFetch && (new Date().getTime() - state.lastFetch.getTime() < 10000)) {
+      console.log('Skipping QR data fetch - throttled', {
+        now: new Date(),
+        lastFetch: state.lastFetch,
+        timeSince: new Date().getTime() - state.lastFetch.getTime()
+      });
+      return;
+    }
+
     try {
       setState(prev => ({ ...prev, loading: true, error: null }))
-      
-      // Fetch QR metadata and analytics in parallel if requested
-      const promises = [
-        qrApi.getMetadata(itemId).catch(() => null), // Metadata might not exist yet
-      ]
-      
-      if (includeAnalytics) {
-        promises.push(
-          qrApi.getAnalytics(itemId).catch(() => null) // Analytics might not exist yet
-        )
-      }
+      console.log('Fetching QR data for:', itemId);
 
-      const [metadata, analytics] = await Promise.all(promises)
+      // Prepare promises with explicit types to avoid union inference issues
+      const metadataPromise: Promise<QrCodeMetadata | null> = qrApi
+        .getMetadata(itemId)
+        .catch(() => null)
 
-      // Validate metadata if we got it
-      let validatedMetadata: QrCodeMetadata | null = null
-      if (metadata) {
-        validatedMetadata = QrCodeMetadataSchema.parse(metadata)
-      }
+      // Analytics sadece açıkça istenirse al
+      const analyticsPromise: Promise<QrAnalytics | null> = includeAnalytics
+        ? qrApi.getAnalytics(itemId).catch(() => null)
+        : Promise.resolve(null)
 
-      // Validate analytics if we got it
-      let validatedAnalytics: QrAnalytics | null = null
-      if (analytics) {
-        validatedAnalytics = QrAnalyticsSchema.parse(analytics)
-      }
+      const [metadata, analytics] = await Promise.all([
+        metadataPromise,
+        analyticsPromise,
+      ])
 
-      // Generate QR URL
-      const qrUrl = qrApi.getQrCodeUrl(itemId, generationOptions)
+      const validatedMetadata = metadata
+        ? QrCodeMetadataSchema.parse(metadata)
+        : null
+      const validatedAnalytics = analytics
+        ? QrAnalyticsSchema.parse(analytics)
+        : null
+
+      // QR URL'yi API çağrısı yapmadan oluştur
+      const qrUrl = itemId ? qrApi.getQrCodeUrl(itemId) : null;
 
       setState({
         data: validatedMetadata,
@@ -109,10 +117,8 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
         error: null,
         lastFetch: new Date(),
       })
-
     } catch (error) {
       let errorMessage = 'Failed to fetch QR data'
-      
       if (error instanceof ValidationApiError) {
         errorMessage = `QR data validation error: ${error.validationErrors.map(e => e.message).join(', ')}`
       } else if (error instanceof ApiError) {
@@ -120,22 +126,50 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
       } else if (error instanceof Error) {
         errorMessage = error.message
       }
-
       setState(prev => ({
         ...prev,
         loading: false,
         error: errorMessage,
       }))
     }
-  }, [enabled, itemId, includeAnalytics, generationOptions])
+  }, [enabled, itemId, includeAnalytics, state.lastFetch])
 
-  // Generate QR code
+  // Generate QR code - optimize edildi
   const generate = useCallback(async (options?: Partial<QrGenerationRequest>): Promise<QrResponse> => {
     if (!itemId) {
       throw new Error('Item ID is required to generate QR code')
     }
-
+    
+    // Eğer son 5 saniye içinde generate yapıldıysa ve QR URL varsa, tekrar istek atmayı engelle
+    const lastGenTime = localStorage.getItem(`qr_gen_time_${itemId}`);
+    const now = Date.now();
+    
+    if (lastGenTime && (now - parseInt(lastGenTime)) < 5000 && state.qrUrl) {
+      console.log('Skipping QR generation - throttled', {
+        itemId,
+        timeSince: now - parseInt(lastGenTime)
+      });
+      
+      // Mevcut QR verilerini kullanarak sahte bir yanıt döndür
+      return {
+        success: true,
+        data: {
+          qrCodeUrl: state.qrUrl,
+          arStartUrl: `${window.location.origin}/ar-start/${itemId}`,
+          arViewUrl: `${window.location.origin}/ar/${itemId}`,
+          itemId: itemId,
+          generatedAt: new Date().toISOString(),
+          size: 400,
+          format: 'png',
+        },
+        message: 'QR code retrieved from cache'
+      };
+    }
+    
+    // Yeni bir istek gönder
+    localStorage.setItem(`qr_gen_time_${itemId}`, now.toString());
     setState(prev => ({ ...prev, loading: true, error: null }))
+    console.log('Generating QR code for:', itemId);
 
     try {
       const request: QrGenerationRequest = {
@@ -153,8 +187,16 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
       const response = await qrApi.generate(request)
       const validatedResponse = QrResponseSchema.parse(response)
 
-      // Refresh data after generation
-      await fetchQrData()
+      // Yanıtı doğrudan kullan, tekrar fetch yapmak yerine state'i güncelle
+      if (validatedResponse.data?.qrCodeUrl) {
+        setState(prev => ({ 
+          ...prev, 
+          qrUrl: validatedResponse.data.qrCodeUrl,
+          loading: false,
+          error: null,
+          lastFetch: new Date()
+        }))
+      }
 
       return validatedResponse
     } catch (error) {
@@ -162,12 +204,11 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
       setState(prev => ({ ...prev, loading: false, error: errorMessage }))
       throw error
     }
-  }, [itemId, generationOptions, fetchQrData])
+  }, [itemId, generationOptions, state.qrUrl])
 
   // Download QR code
   const download = useCallback(async (
-    filename?: string, 
-    options?: { size?: number; format?: 'png' | 'jpg' | 'svg' }
+    filename?: string
   ) => {
     if (!itemId) {
       throw new Error('Item ID is required to download QR code')
@@ -176,11 +217,41 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
     setState(prev => ({ ...prev, loading: true, error: null }))
 
     try {
-      await qrApi.download(itemId, filename, options)
+      await qrApi.download(itemId, filename)
       setState(prev => ({ ...prev, loading: false }))
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Failed to download QR code'
       setState(prev => ({ ...prev, loading: false, error: errorMessage }))
+      throw error
+    }
+  }, [itemId])
+
+  // Copy to clipboard
+  const copyToClipboard = useCallback(async () => {
+    if (!itemId) {
+      throw new Error('Item ID is required to copy URL')
+    }
+
+    try {
+      const arUrl = qrHelpers.getArStartUrl(itemId)
+      await navigator.clipboard.writeText(arUrl)
+      
+      // Track copy event
+      await qrApi.trackScan(itemId, {
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        deviceInfo: {
+          isMobile: /iphone|ipad|ipod|android/i.test(navigator.userAgent),
+          platform: navigator.platform,
+          supportsAR: 'xr' in navigator || /iphone|ipad|ipod|android/i.test(navigator.userAgent),
+        },
+      })
+      
+    } catch (error) {
+      if (error instanceof Error && error.message.includes('clipboard')) {
+        throw new Error('Failed to copy to clipboard. Please try again.')
+      }
       throw error
     }
   }, [itemId])
@@ -193,7 +264,7 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
 
     try {
       if (navigator.share) {
-        const arUrl = qrApi.getArStartUrl ? qrApi.getArStartUrl(itemId) : `/ar-view?item_id=${itemId}`
+        const arUrl = qrHelpers.getArStartUrl(itemId)
         
         await navigator.share({
           title: itemName ? `AR View: ${itemName}` : 'AR Experience',
@@ -211,30 +282,7 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
       }
       throw error
     }
-  }, [itemId])
-
-  // Copy to clipboard
-  const copyToClipboard = useCallback(async () => {
-    if (!itemId) {
-      throw new Error('Item ID is required to copy URL')
-    }
-
-    try {
-      const arUrl = qrApi.getArStartUrl ? qrApi.getArStartUrl(itemId) : `/ar-view?item_id=${itemId}`
-      await navigator.clipboard.writeText(arUrl)
-    } catch (error) {
-      // Fallback for older browsers
-      const arUrl = qrApi.getArStartUrl ? qrApi.getArStartUrl(itemId) : `/ar-view?item_id=${itemId}`
-      const textArea = document.createElement('textarea')
-      textArea.value = arUrl
-      textArea.style.position = 'fixed'
-      textArea.style.opacity = '0'
-      document.body.appendChild(textArea)
-      textArea.select()
-      document.execCommand('copy')
-      document.body.removeChild(textArea)
-    }
-  }, [itemId])
+  }, [itemId, copyToClipboard])
 
   // Track QR scan
   const trackScan = useCallback(async () => {
@@ -268,8 +316,8 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
 
     return {
       qrUrl: state.qrUrl || qrApi.getQrCodeUrl(itemId),
-      arStartUrl: qrApi.getArStartUrl ? qrApi.getArStartUrl(itemId) : `/ar-start/${itemId}`,
-      arViewUrl: qrApi.getArViewUrl ? qrApi.getArViewUrl(itemId) : `/ar-view?item_id=${itemId}`,
+      arStartUrl: qrHelpers.getArStartUrl(itemId),
+      arViewUrl: qrHelpers.getArViewUrl(itemId),
     }
   }, [itemId, state.qrUrl])
 
@@ -284,19 +332,36 @@ export function useQr(options: UseQrOptions = {}): UseQrReturn {
     []
   )
 
-  // Initial fetch
+  // Initial fetch - sadece gerekli olduğunda çalışacak şekilde düzenlendi
   useEffect(() => {
-    fetchQrData()
-  }, [fetchQrData])
-
-  // Auto-generate QR code if requested
-  useEffect(() => {
-    if (autoGenerate && itemId && !state.data && !state.loading && !state.error) {
-      generate().catch(error => {
-        console.warn('Auto-generation failed:', error)
-      })
+    // Sadece enabled ise ve itemId varsa fetch yap
+    if (enabled && itemId) {
+      console.log('Initial QR data fetch triggered for:', itemId);
+      fetchQrData();
     }
-  }, [autoGenerate, itemId, state.data, state.loading, state.error, generate])
+  }, [enabled, itemId, fetchQrData])
+
+  // Auto-generate QR code if requested - throttling ekledik
+  useEffect(() => {
+    // Sadece autoGenerate açık ise, itemId varsa ve henüz veri yoksa generate et
+    if (autoGenerate && itemId && !state.qrUrl && !state.loading && !state.error) {
+      console.log('Auto-generating QR code for:', itemId);
+      
+      // Son 5 saniye içinde generate yapılmadıysa yap
+      const lastGenTime = localStorage.getItem(`qr_gen_time_${itemId}`);
+      const now = Date.now();
+      
+      if (!lastGenTime || (now - parseInt(lastGenTime)) > 5000) {
+        localStorage.setItem(`qr_gen_time_${itemId}`, now.toString());
+        
+        generate().catch(error => {
+          console.warn('Auto-generation failed:', error);
+        });
+      } else {
+        console.log('Skipping auto-generation - throttled');
+      }
+    }
+  }, [autoGenerate, itemId, state.qrUrl, state.loading, state.error, generate])
 
   return {
     ...state,

@@ -3,7 +3,11 @@ import { ApiError, ValidationApiError, type ErrorResponse, type ValidationError 
 import { logger } from '@/utils/logger'
 
 // Get API base URL from environment variables
-const API_BASE_URL = import.meta.env.VITE_API_BASE || '/api'
+// Priority: VITE_API_URL > VITE_API_BASE > fallback to /api
+// For development with Flask backend, use relative path to avoid CORS issues
+const API_BASE_URL = import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE || (
+  import.meta.env.DEV ? '/api' : '/api'
+)
 
 // Create axios instance with default config
 export const apiClient = axios.create({

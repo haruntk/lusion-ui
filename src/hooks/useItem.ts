@@ -9,13 +9,6 @@ interface UseItemState {
   lastFetch: Date | null
 }
 
-interface UseItemOptions {
-  enabled?: boolean
-  staleTime?: number
-  retryOnError?: boolean
-  maxRetries?: number
-}
-
 export interface UseItemReturn extends UseItemState {
   refetch: () => Promise<void>
   isNotFound: boolean
@@ -79,7 +72,7 @@ export function useItem(
       
       try {
         item = await itemsApi.getById(itemId.trim())
-      } catch (directError) {
+      } catch {
         // If direct fetch fails, try fallback method
         console.warn(`Direct item fetch failed for ID: ${itemId}, trying fallback`)
         item = await itemsApi.findById(itemId.trim())
@@ -90,7 +83,7 @@ export function useItem(
       if (item) {
         try {
           validatedItem = ItemDetailSchema.parse(item)
-        } catch (validationError) {
+        } catch {
           // If validation fails, try with basic Item schema
           const basicItem = ItemSchema.parse(item)
           // Convert Item to ItemDetail format
@@ -172,7 +165,8 @@ export function useItem(
   useEffect(() => {
     setRetryCount(0) // Reset retry count when itemId changes
     fetchItem(false)
-  }, [fetchItem])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemId, enabled]) // Only depend on itemId and enabled, not fetchItem function
 
   return {
     ...state,

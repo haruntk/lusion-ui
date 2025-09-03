@@ -1,15 +1,24 @@
 import { z } from 'zod'
 
-// Base Item Schema
+// Base Item Schema - Only essential fields are required
 export const ItemSchema = z.object({
+  // Required fields
   id: z.string().min(1, "Item ID is required"),
   name: z.string().min(1, "Item name is required"),
   description: z.string().min(1, "Item description is required"),
   category: z.string().min(1, "Category is required"),
   price: z.string().min(1, "Price is required"),
-  image: z.string().url("Image must be a valid URL"),
-  model: z.string().url("3D model must be a valid URL"),
-  model_ios: z.string().url("iOS model must be a valid URL").optional(),
+  has_ar_model: z.boolean("Has AR model must be a boolean"),
+  
+  // Optional fields - can be missing or empty (including empty strings)
+  image: z.union([z.string().url(), z.literal("")]).optional(),
+  model: z.union([z.string().url(), z.literal("")]).optional(),
+  model_ios: z.union([z.string().url(), z.literal("")]).optional(),
+  gluten_free: z.boolean().optional(),
+  vegan: z.boolean().optional(),
+  vegetarian: z.boolean().optional(),
+  rating: z.number().min(0).max(5, "Rating must be between 0 and 5").optional(),
+  review_count: z.number().int().min(0, "Review count must be a non-negative integer").optional(),
 })
 
 // Item Detail Schema (same as Item but with additional metadata)

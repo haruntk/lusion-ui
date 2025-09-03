@@ -8,7 +8,8 @@ import {
   List,
   ArrowRight,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  Package
 } from "lucide-react"
 import { 
   Button, 
@@ -320,12 +321,18 @@ export function MenuPage() {
               <Card className="h-full hover:shadow-lg transition-shadow duration-300 group">
                 <CardHeader className="p-0">
                   <div className={`${viewMode === 'grid' ? 'aspect-video' : 'aspect-[4/3] md:aspect-video'} bg-muted rounded-t-lg overflow-hidden`}>
-                    <img
-                      src={item.image}
-                      alt={`${item.name} - ${item.description}`}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
+                    {item.image && item.image !== "" ? (
+                      <img
+                        src={item.image}
+                        alt={`${item.name} - ${item.description}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                        <Package className="h-12 w-12 text-muted-foreground/30" />
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="p-4">
@@ -345,15 +352,26 @@ export function MenuPage() {
                       {item.price}
                     </span>
                     <div className="flex gap-2">
-                      <Button asChild size="sm" variant="outline">
-                        <Link 
-                          to={`/menu/${item.id}`}
-                          aria-label={`View ${item.name} details and AR experience`}
-                        >
-                          <Sparkles className="h-4 w-4 mr-1" />
-                          View AR
-                        </Link>
-                      </Button>
+                      {item.has_ar_model ? (
+                        <Button asChild size="sm" variant="outline">
+                          <Link 
+                            to={`/menu/${item.id}`}
+                            aria-label={`View ${item.name} details and AR experience`}
+                          >
+                            <Sparkles className="h-4 w-4 mr-1" />
+                            View AR
+                          </Link>
+                        </Button>
+                      ) : (
+                        <Button asChild size="sm" variant="outline">
+                          <Link 
+                            to={`/menu/${item.id}`}
+                            aria-label={`View ${item.name} details`}
+                          >
+                            Details
+                          </Link>
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </CardContent>

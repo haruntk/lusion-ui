@@ -58,7 +58,7 @@ export function ArViewer({
         
         // Detect device type
         const userAgent = navigator.userAgent
-        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !window.MSStream
+        const isIOS = /iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream
         const isAndroid = /android/i.test(userAgent)
         const isMobile = /mobile|tablet|iphone|ipad|ipod|android/i.test(userAgent)
         
@@ -138,9 +138,9 @@ export function ArViewer({
         <Card className="w-full max-w-md bg-slate-800/80 border-slate-700/50">
           <CardContent className="text-center p-6 space-y-4">
             <div className="text-destructive text-5xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-destructive">AR Model Could Not Be Loaded</h2>
+            <h2 className="text-xl font-bold text-destructive">AR Modeli Yüklenemedi</h2>
             <p className="text-slate-300">
-              {error || "The requested AR model could not be loaded. Please try another model."}
+              {error || "İstenen AR modeli yüklenemiyor. Lütfen başka bir model deneyin."}
             </p>
             <div className="space-y-2 pt-4">
               <Button asChild className="w-full">

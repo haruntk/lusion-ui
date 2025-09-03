@@ -1,4 +1,4 @@
-import { type AxiosResponse } from 'axios'
+// import { type AxiosResponse } from 'axios'
 import { apiClient } from './client'
 import { 
   DeviceInfoSchema,
@@ -80,13 +80,13 @@ export const arApi = {
       if (deviceInfo.isIOS || deviceInfo.isAndroid) {
         // Mobile devices: use backend AR start for platform detection
         window.location.href = `/ar-start/${itemId}`
-      } else {
-        // Desktop/other: go directly to AR view
-        window.location.href = `/ar/${itemId}`
-      }
+          } else {
+      // Desktop/other: go directly to AR view (no hash for Safari compatibility)
+      window.location.href = `/ar/${itemId}`
+    }
     } catch (error) {
       console.error('Failed to start AR session:', error)
-      // Fallback to direct AR view
+      // Fallback to direct AR view (no hash for Safari compatibility)
       window.location.href = `/ar/${itemId}`
     }
   },
@@ -142,7 +142,7 @@ export async function startArSession(itemId: string): Promise<void> {
       window.location.href = arStartUrl;
     } else {
       // Masaüstü için doğrudan AR view sayfasına yönlendir
-      // Hash URL kullan - SPA yönlendirmesi için
+      // Direct URL kullan - Safari compatibility için
       console.log(`Desktop device detected. Redirecting to AR view directly`);
       window.location.href = `/ar/${itemId}`;
     }
@@ -151,6 +151,6 @@ export async function startArSession(itemId: string): Promise<void> {
     
     // Fallback olarak doğrudan AR view'a yönlendir
     console.log(`Error occurred. Fallback to AR view`);
-    window.location.href = `/#/ar/${itemId}`;
+    window.location.href = `/ar/${itemId}`;
   }
 }

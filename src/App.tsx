@@ -3,7 +3,7 @@ import { BrowserRouter as Router, useLocation } from 'react-router-dom'
 import { AppRoutes } from '@/routes'
 import { ToastProvider } from '@/components/ui'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
-import { RouteDebugger } from '@/components/RouteDebugger'
+// import { RouteDebugger } from '@/components/RouteDebugger'
 import { ThemeProvider } from '@/contexts/ThemeContext'
 import './App.css'
 
@@ -42,7 +42,7 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <Router future={{ v7_startTransition: true }}>
+        <Router>
           <NavigationMonitor />
           {/* <RouteDebugger /> */}
           <ToastProvider>

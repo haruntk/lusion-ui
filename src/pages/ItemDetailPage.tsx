@@ -289,35 +289,44 @@ export function ItemDetailPage() {
         <div className="space-y-6">
           <motion.div variants={itemVariants}>
             <div className="aspect-[4/3] bg-muted rounded-xl overflow-hidden shadow-lg ring-1 ring-black/5 w-full max-w-2xl">
-              <img
-                src={`${item.image}&w=1200&h=900&q=95&fit=crop&crop=center`}
-                alt={item.name}
-                className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
-                loading="eager"
-                style={{ 
-                  imageRendering: 'crisp-edges',
-                  objectFit: 'contain',
-                  objectPosition: 'center',
-                  backgroundColor: '#f8f9fa'
-                }}
-                width="800"
-                height="600"
-              />
+              {item.image && item.image !== "" ? (
+                <img
+                  src={`${item.image}&w=1200&h=900&q=95&fit=crop&crop=center`}
+                  alt={item.name}
+                  className="w-full h-full object-contain hover:scale-105 transition-transform duration-300"
+                  loading="eager"
+                  style={{ 
+                    imageRendering: 'crisp-edges',
+                    objectFit: 'contain',
+                    objectPosition: 'center',
+                    backgroundColor: '#f8f9fa'
+                  }}
+                  width="800"
+                  height="600"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-muted to-muted/30 flex flex-col items-center justify-center">
+                  <Package className="h-24 w-24 text-muted-foreground/20 mb-4" />
+                  <p className="text-muted-foreground text-lg font-medium">{item.name}</p>
+                  <p className="text-muted-foreground/60 text-sm">No image available</p>
+                </div>
+              )}
             </div>
           </motion.div>
           
-          {/* QR Code Section */}
-          <motion.div variants={itemVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <QrCode className="h-5 w-5" />
-                    AR QR Code
-                  </div>
-                  {qrLoading && <Spinner size="sm" />}
-                </CardTitle>
-              </CardHeader>
+          {/* QR Code Section - Only show if item has AR model */}
+          {item.has_ar_model && (
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="h-5 w-5" />
+                      AR QR Code
+                    </div>
+                    {qrLoading && <Spinner size="sm" />}
+                  </CardTitle>
+                </CardHeader>
               <CardContent>
                 <div className="flex flex-col items-center space-y-4">
                   {/* QR Code Display */}
@@ -432,50 +441,53 @@ export function ItemDetailPage() {
               </CardContent>
             </Card>
           </motion.div>
+          )}
 
-          {/* 3D Model Info */}
-          <motion.div variants={itemVariants}>
-            <Card>
-              <CardHeader className="cursor-pointer" onClick={() => setIsModelDetailsExpanded(!isModelDetailsExpanded)}>
-                <CardTitle className="flex items-center justify-between">
-                  <span>3D Model Details</span>
-                  {isModelDetailsExpanded ? (
-                    <ChevronUp className="h-4 w-4 text-muted-foreground" />
-                  ) : (
-                    <ChevronDown className="h-4 w-4 text-muted-foreground" />
-                  )}
-                </CardTitle>
-              </CardHeader>
-              {isModelDetailsExpanded && (
-                <CardContent className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Format:</span>
-                  <span className="font-medium">GLB</span>
-                </div>
-                {item.model_ios && (
+          {/* 3D Model Info - Only show if item has AR model */}
+          {item.has_ar_model && (
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader className="cursor-pointer" onClick={() => setIsModelDetailsExpanded(!isModelDetailsExpanded)}>
+                  <CardTitle className="flex items-center justify-between">
+                    <span>3D Model Details</span>
+                    {isModelDetailsExpanded ? (
+                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </CardTitle>
+                </CardHeader>
+                {isModelDetailsExpanded && (
+                  <CardContent className="space-y-3">
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">iOS Format:</span>
-                    <span className="font-medium">USDZ</span>
+                    <span className="text-muted-foreground">Format:</span>
+                    <span className="font-medium">GLB</span>
                   </div>
+                  {item.model_ios && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">iOS Format:</span>
+                      <span className="font-medium">USDZ</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">AR Ready:</span>
+                    <Badge variant="success" className="text-xs">
+                      ✓ Yes
+                    </Badge>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Platform Support:</span>
+                    <div className="flex gap-1">
+                      <Badge variant="outline" className="text-xs">iOS</Badge>
+                      <Badge variant="outline" className="text-xs">Android</Badge>
+                      <Badge variant="outline" className="text-xs">Web</Badge>
+                    </div>
+                  </div>
+                  </CardContent>
                 )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">AR Ready:</span>
-                  <Badge variant="success" className="text-xs">
-                    ✓ Yes
-                  </Badge>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Platform Support:</span>
-                  <div className="flex gap-1">
-                    <Badge variant="outline" className="text-xs">iOS</Badge>
-                    <Badge variant="outline" className="text-xs">Android</Badge>
-                    <Badge variant="outline" className="text-xs">Web</Badge>
-                  </div>
-                </div>
-                </CardContent>
-              )}
-            </Card>
-          </motion.div>
+              </Card>
+            </motion.div>
+          )}
         </div>
 
         {/* Item Details */}
@@ -495,65 +507,84 @@ export function ItemDetailPage() {
             </div>
           </motion.div>
 
-          {/* AR Experience Card */}
-          <motion.div variants={itemVariants}>
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5" />
-                    AR Experience
-                  </div>
-                  {arLoading && <Spinner size="sm" />}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Device Info */}
-                {deviceInfo && (
-                  <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div className="flex items-center space-x-2">
-                      <Smartphone className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {deviceInfo.platform === 'ios' ? 'iOS Device' : 
-                         deviceInfo.platform === 'android' ? 'Android Device' : 
-                         'Desktop Browser'}
-                      </span>
+          {/* AR Experience Card - Only show if item has AR model */}
+          {item.has_ar_model ? (
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="h-5 w-5" />
+                      AR Experience
                     </div>
-                    <Badge variant="success">
-                      AR Experience Ready
-                    </Badge>
-                  </div>
-                )}
+                    {arLoading && <Spinner size="sm" />}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {/* Device Info */}
+                  {deviceInfo && (
+                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <Smartphone className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-sm">
+                          {deviceInfo.platform === 'ios' ? 'iOS Device' : 
+                           deviceInfo.platform === 'android' ? 'Android Device' : 
+                           'Desktop Browser'}
+                        </span>
+                      </div>
+                      <Badge variant="success">
+                        AR Experience Ready
+                      </Badge>
+                    </div>
+                  )}
 
-                <p className="text-sm text-muted-foreground">
-                  View this item in augmented reality on your mobile device
-                </p>
-                
-                <div className="flex flex-col gap-3">
-                  <Button 
-                    className="gap-2 w-full" 
-                    onClick={startAr}
-                    size="lg"
-                  >
-                    <Smartphone className="h-5 w-5" />
-                    Start AR Experience
-                  </Button>
-                </div>
-                
-                {arError && (
-                  <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
-                    <p className="text-sm text-destructive">{arError}</p>
+                  <p className="text-sm text-muted-foreground">
+                    View this item in augmented reality on your mobile device
+                  </p>
+                  
+                  <div className="flex flex-col gap-3">
+                    <Button 
+                      className="gap-2 w-full" 
+                      onClick={startAr}
+                      size="lg"
+                    >
+                      <Smartphone className="h-5 w-5" />
+                      Start AR Experience
+                    </Button>
                   </div>
-                )}
+                  
+                  {arError && (
+                    <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
+                      <p className="text-sm text-destructive">{arError}</p>
+                    </div>
+                  )}
 
-                <p className="text-xs text-muted-foreground">
-                  {deviceInfo?.isMobile 
-                    ? "Optimized for your mobile device" 
-                    : "Best experienced on mobile devices with AR support"}
-                </p>
-              </CardContent>
-            </Card>
-          </motion.div>
+                  <p className="text-xs text-muted-foreground">
+                    {deviceInfo?.isMobile 
+                      ? "Optimized for your mobile device" 
+                      : "Best experienced on mobile devices with AR support"}
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ) : (
+            /* Alternative content when AR is not available */
+            <motion.div variants={itemVariants}>
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="h-5 w-5" />
+                    Item Information
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-muted-foreground">
+                    This item is currently available for viewing but does not have AR experience enabled.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
 
           {/* Additional Item Info */}
           {item.tags && item.tags.length > 0 && (

@@ -71,8 +71,17 @@ export function useItems(options: UseItemsOptions = {}): UseItemsReturn {
         itemsApi.getCategories(),
       ])
 
-      // Validate response data
-      const validatedItems = z.array(ItemSchema).parse(items)
+      // Validate response data individually to handle partial failures
+      const validatedItems = items
+        .map((item: any, index: number) => {
+          try {
+            return ItemSchema.parse(item)
+          } catch (error) {
+            console.warn(`Item at index ${index} failed final validation and will be skipped:`, error, item)
+            return null
+          }
+        })
+        .filter((item: Item | null): item is Item => item !== null)
 
       setState({
         data: validatedItems,

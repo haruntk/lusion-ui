@@ -58,8 +58,9 @@ export default defineConfig({
   define: {
     // Expose common environment variables (if they exist)
     // These will be available as import.meta.env.VITE_*
-    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || 'http://localhost:5000/api'),
-    'import.meta.env.VITE_API_BASE': JSON.stringify(process.env.VITE_API_BASE || 'http://localhost:5000/api'),
+    // Use relative '/api' by default so that mobile clients hit the same host
+    'import.meta.env.VITE_API_URL': JSON.stringify(process.env.VITE_API_URL || '/api'),
+    'import.meta.env.VITE_API_BASE': JSON.stringify(process.env.VITE_API_BASE || '/api'),
     'import.meta.env.VITE_APP_VERSION': JSON.stringify(process.env.VITE_APP_VERSION || '1.0.0'),
     'import.meta.env.VITE_DISABLE_STRICT_MODE': JSON.stringify(process.env.VITE_DISABLE_STRICT_MODE || 'false'),
   },

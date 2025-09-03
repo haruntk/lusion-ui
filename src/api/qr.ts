@@ -44,7 +44,7 @@ export const qrApi = {
           data: {
             qrCodeUrl: qrCodeUrl,
             arStartUrl: `${baseUrl}/ar-start/${validatedRequest.itemId}`,
-            arViewUrl: `${baseUrl}/#/ar/${validatedRequest.itemId}`,
+            arViewUrl: `${baseUrl}/ar/${validatedRequest.itemId}`,
             itemId: validatedRequest.itemId,
             generatedAt: new Date().toISOString(),
             size: validatedRequest.size,
@@ -70,7 +70,7 @@ export const qrApi = {
         data: {
           qrCodeUrl: qrUrl,
           arStartUrl: `${baseUrl}/ar-start/${validatedRequest.itemId}`,
-          arViewUrl: `${baseUrl}/#/ar/${validatedRequest.itemId}`,
+          arViewUrl: `${baseUrl}/ar/${validatedRequest.itemId}`,
           itemId: validatedRequest.itemId,
           generatedAt: new Date().toISOString(),
           size: validatedRequest.size,
@@ -224,6 +224,9 @@ export const qrApi = {
         size: 800, // Larger size
         format: 'png',
         errorCorrection: 'H', // High error correction
+        margin: 4,
+        foregroundColor: '#000000',
+        backgroundColor: '#FFFFFF'
       });
       
       if (qrResponse && qrResponse.data && qrResponse.data.qrCodeUrl) {
@@ -348,8 +351,8 @@ export const qrHelpers = {
   getArViewUrl(itemId: string): string {
     if (!itemId) return '';
     const baseUrl = window.location.origin
-    // Redirect directly to AR view endpoint
-    return `${baseUrl}/#/ar/${itemId}`
+    // Redirect directly to AR view endpoint (no hash for Safari compatibility)
+    return `${baseUrl}/ar/${itemId}`
   },
 
   /**

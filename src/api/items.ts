@@ -1,4 +1,3 @@
-import { z } from 'zod'
 import { apiClient } from './client'
 import { 
   ItemSchema, 
@@ -9,8 +8,7 @@ import {
   type ItemSearchParams
 } from '@/types/item.schema'
 
-// Response schemas for API validation
-const ItemsListResponseSchema = z.array(ItemSchema)
+// Individual item validation is now handled per-item rather than array-level
 
 /**
  * Items API module
@@ -43,8 +41,17 @@ export const itemsApi = {
       // Check if Flask returned data
       let items: Item[] = []
       if (Array.isArray(response.data) && response.data.length > 0) {
-        // Parse and validate the response
-        items = ItemsListResponseSchema.parse(response.data)
+        // Parse and validate each item individually to handle partial failures
+        items = response.data
+          .map((item: any, index: number) => {
+            try {
+              return ItemSchema.parse(item)
+            } catch (error) {
+              console.warn(`Item at index ${index} failed validation and will be skipped:`, error, item)
+              return null
+            }
+          })
+          .filter((item: Item | null): item is Item => item !== null)
       } else {
         // Return empty array if no items from backend
         items = []
@@ -111,7 +118,17 @@ export const itemsApi = {
       })
       
       if (Array.isArray(response.data) && response.data.length > 0) {
-        return ItemsListResponseSchema.parse(response.data)
+        // Parse each item individually to handle validation failures gracefully
+        return response.data
+          .map((item: any, index: number) => {
+            try {
+              return ItemSchema.parse(item)
+            } catch (error) {
+              console.warn(`Item at index ${index} failed validation and will be skipped:`, error, item)
+              return null
+            }
+          })
+          .filter((item: Item | null): item is Item => item !== null)
       }
       return []
     } catch (error) {
@@ -137,7 +154,17 @@ export const itemsApi = {
       })
       
       if (Array.isArray(response.data)) {
-        return ItemsListResponseSchema.parse(response.data)
+        // Parse each item individually to handle validation failures gracefully
+        return response.data
+          .map((item: any, index: number) => {
+            try {
+              return ItemSchema.parse(item)
+            } catch (error) {
+              console.warn(`Item at index ${index} failed validation and will be skipped:`, error, item)
+              return null
+            }
+          })
+          .filter((item: Item | null): item is Item => item !== null)
       }
       return []
     } catch (error) {

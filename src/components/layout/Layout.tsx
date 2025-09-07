@@ -4,29 +4,21 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Navbar } from "./Navbar"
 import { Footer } from "./Footer"
 
-// Page transition variants
+// Page transition variants (opacity-only to avoid vertical jank)
 const pageVariants = {
   initial: {
     opacity: 0,
-    y: 20,
-    scale: 0.98,
   },
   in: {
     opacity: 1,
-    y: 0,
-    scale: 1,
   },
   out: {
     opacity: 0,
-    y: -20,
-    scale: 1.02,
   },
 }
 
 const pageTransition = {
-  type: "tween",
-  ease: "anticipate",
-  duration: 0.4,
+  duration: 0.25,
 }
 
 export function Layout() {
@@ -49,6 +41,11 @@ export function Layout() {
     return () => clearTimeout(timer)
   }, [location.pathname])
 
+  // Always scroll to top on route change to prevent perceived downward shift
+  React.useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' })
+  }, [location.pathname])
+
   // Debug navigation in development
   React.useEffect(() => {
     if (import.meta.env.DEV) {
@@ -62,7 +59,7 @@ export function Layout() {
       <Navbar />
       
       <main className="flex-1 relative">
-        <AnimatePresence mode="wait" onExitComplete={() => setIsNavigating(false)}>
+        <AnimatePresence mode="sync" onExitComplete={() => setIsNavigating(false)}>
           <motion.div
             key={location.pathname}
             initial={location.pathname === '/' ? "in" : "initial"}
@@ -82,7 +79,7 @@ export function Layout() {
               </div>
             )}
             
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
               <React.Suspense 
                 fallback={
                   <div className="flex items-center justify-center min-h-[50vh]">

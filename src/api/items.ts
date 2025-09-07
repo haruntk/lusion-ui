@@ -76,15 +76,15 @@ export const itemsApi = {
 
     try {
       // Use new dedicated API endpoint for items
-      const response = await apiClient.get(`items/${id}`)
+      const response = await apiClient.get(`/items/${id}`)
       if (response.data) {
         return ItemSchema.parse(response.data)
       }
       return null
     } catch (error) {
       console.error(`Error fetching item ${id}:`, error)
-      // Fall back to findById as a backup strategy
-      return await this.findById(id)
+      // Do not call findById here to avoid recursion. Return null and let caller decide fallback.
+      return null
     }
   },
 
@@ -92,15 +92,10 @@ export const itemsApi = {
    * Find item by ID from all items list (fallback method)
    */
   async findById(id: string): Promise<Item | null> {
-    try {
-      // Try the direct API endpoint first
-      return await this.getById(id)
-    } catch {
-      // Fall back to client-side filtering
-      const items = await this.getAll()
-      const item = items.find(item => item.id === id)
-      return item || null
-    }
+    // Client-side fallback: fetch all items and find locally
+    const items = await this.getAll()
+    const item = items.find(item => item.id === id)
+    return item || null
   },
 
   /**

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Link } from "react-router-dom"
+import { Link, useLocation } from "react-router-dom"
 import { motion } from "framer-motion"
 import { 
   Search, 
@@ -24,27 +24,24 @@ import { ErrorState, EmptyState } from "@/components/common"
 import { useItems } from "@/hooks"
 
 const pageVariants = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0 },
   animate: { 
-    opacity: 1, 
-    y: 0,
+    opacity: 1,
     transition: {
-      duration: 0.5,
+      duration: 0.4,
       staggerChildren: 0.1
     }
   },
   exit: { 
-    opacity: 0, 
-    y: -20,
-    transition: { duration: 0.3 }
+    opacity: 0,
+    transition: { duration: 0.2 }
   }
 }
 
 const itemVariants = {
-  initial: { opacity: 0, y: 20 },
+  initial: { opacity: 0 },
   animate: { 
-    opacity: 1, 
-    y: 0,
+    opacity: 1,
     transition: {
       type: "spring" as const,
       stiffness: 300,
@@ -54,6 +51,7 @@ const itemVariants = {
 }
 
 export function MenuPage() {
+  const location = useLocation()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null)
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
@@ -80,6 +78,25 @@ export function MenuPage() {
     getItemsByCategory
   } = useItems(itemsOptions)
 
+  // Defensive revalidation when arriving to /menu from other routes
+  React.useEffect(() => {
+    if (location.pathname === '/menu') {
+      // Refetch to ensure fresh data after navigating back from details
+      refetch()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.pathname])
+
+  // Auto recover if empty without error after a brief moment (race protection)
+  React.useEffect(() => {
+    if (!loading && !error && items.length === 0) {
+      const t = setTimeout(() => {
+        refetch()
+      }, 200)
+      return () => clearTimeout(t)
+    }
+  }, [items.length, loading, error, refetch])
+
   // Filter items based on search and category
   const filteredItems = React.useMemo(() => {
     let result = items
@@ -95,8 +112,8 @@ export function MenuPage() {
     return result
   }, [items, searchQuery, selectedCategory, searchItems, getItemsByCategory])
 
-  // Handle loading state
-  if (loading) {
+  // Handle loading state (avoid full-page blank by keeping skeleton ready)
+  if (loading && items.length === 0) {
     return (
       <motion.div
         variants={pageVariants}

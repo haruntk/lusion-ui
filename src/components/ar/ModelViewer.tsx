@@ -14,6 +14,10 @@ interface ModelViewerProps {
   arScale?: 'auto' | 'fixed'
   autoRotate?: boolean
   autoRotateDelay?: number
+  autoplay?: boolean
+  animationName?: string
+  animationLoop?: boolean
+  animationCrossfadeDuration?: number
   cameraControls?: boolean
   cameraOrbit?: string
   environmentImage?: string
@@ -48,6 +52,10 @@ export function ModelViewer({
   arScale = 'auto',
   autoRotate = true,
   autoRotateDelay = 3000,
+  autoplay = true,
+  animationName,
+  animationLoop = true,
+  animationCrossfadeDuration = 300,
   cameraControls = true,
   cameraOrbit,
   environmentImage = 'neutral',
@@ -166,6 +174,10 @@ export function ModelViewer({
       ar-scale={arScale}
       auto-rotate={autoRotate}
       auto-rotate-delay={autoRotateDelay}
+      autoplay={autoplay}
+      animation-name={animationName}
+      animation-loop={animationLoop}
+      animation-crossfade-duration={animationCrossfadeDuration}
       camera-controls={cameraControls}
       camera-orbit={cameraOrbit}
       environment-image={environmentImage}
@@ -176,6 +188,6 @@ export function ModelViewer({
       style={style}
     >
       {children}
-    </model-viewer>
+    </model-viewer>   // @ts-ignore - model-viewer is a custom element
   )
 }

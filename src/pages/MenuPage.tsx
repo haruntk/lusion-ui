@@ -22,6 +22,7 @@ import {
 } from "@/components/ui"
 import { ErrorState, EmptyState } from "@/components/common"
 import { useItems } from "@/hooks"
+import { useLanguage } from '@/hooks/useLanguage'
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -52,20 +53,22 @@ const itemVariants = {
 
 export function MenuPage() {
   const location = useLocation()
+  const { lang, t } = useLanguage()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null)
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
 
   // Set document title for accessibility
   React.useEffect(() => {
-    document.title = "Menu - Lusion AR Dining"
+    document.title = t('menu.headerTitle') + ' - Lusion AR Dining'
   }, [])
 
   // Memoize options to prevent infinite re-renders
   const itemsOptions = React.useMemo(() => ({
     enabled: true,
     refetchInterval: undefined, // No auto-refresh
-  }), [])
+    params: { search: searchQuery || undefined, category: selectedCategory || undefined }
+  }), [lang, searchQuery, selectedCategory])
 
   const { 
     data: items, 
@@ -81,11 +84,17 @@ export function MenuPage() {
   // Defensive revalidation when arriving to /menu from other routes
   React.useEffect(() => {
     if (location.pathname === '/menu') {
-      // Refetch to ensure fresh data after navigating back from details
+      // Refetch to ensure fresh data after navigating back from details or language change
       refetch()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location.pathname])
+  }, [location.pathname, lang])
+
+  // Refetch when language changes to avoid showing stale cached data
+  React.useEffect(() => {
+    refetch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang])
 
   // Auto recover if empty without error after a brief moment (race protection)
   React.useEffect(() => {
@@ -95,7 +104,7 @@ export function MenuPage() {
       }, 200)
       return () => clearTimeout(t)
     }
-  }, [items.length, loading, error, refetch])
+  }, [items.length, loading, error, refetch, lang])
 
   // Filter items based on search and category
   const filteredItems = React.useMemo(() => {
@@ -123,8 +132,8 @@ export function MenuPage() {
       >
         <div className="text-center py-16">
           <Spinner size="lg" className="mx-auto mb-4" />
-          <h1 className="text-2xl font-semibold mb-2">Loading Menu</h1>
-          <p className="text-muted-foreground">Fetching delicious items for you...</p>
+          <h1 className="text-2xl font-semibold mb-2">{t('menu.loadingTitle')}</h1>
+          <p className="text-muted-foreground">{t('menu.loadingSubtitle')}</p>
         </div>
       </motion.div>
     )
@@ -140,7 +149,7 @@ export function MenuPage() {
         className="container mx-auto px-4 py-8"
       >
         <ErrorState
-          title="Failed to Load Menu"
+          title={t('menu.failedTitle')}
           message={error}
           retry={refetch}
         />
@@ -158,10 +167,10 @@ export function MenuPage() {
         className="container mx-auto px-4 py-8"
       >
         <EmptyState
-          title="No Menu Items Available"
-          message="The menu is currently being updated. Please check back soon."
+          title={t('menu.emptyAvailableTitle')}
+          message={t('menu.emptyAvailableDesc')}
           action={{
-            label: "Refresh Menu",
+            label: t('menu.emptyRefreshLabel'),
             onClick: refetch
           }}
         />
@@ -182,10 +191,10 @@ export function MenuPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              Our Menu
+              {t('menu.headerTitle')}
             </h1>
             <p className="text-muted-foreground text-lg">
-              Discover our delicious dishes with AR preview capabilities
+              {t('menu.headerSubtitle')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -226,7 +235,7 @@ export function MenuPage() {
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Search menu items..."
+              placeholder={t('menu.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -243,7 +252,7 @@ export function MenuPage() {
             aria-label="Clear all filters"
           >
             <Filter className="h-4 w-4 mr-2" />
-            Clear Filters
+            {t('common.clearFilters')}
           </Button>
         </div>
 
@@ -255,7 +264,7 @@ export function MenuPage() {
             onClick={() => setSelectedCategory(null)}
             aria-label="Show all categories"
           >
-            All Categories ({items.length})
+            {t('menu.allCategories', { count: items.length })}
           </Button>
           {categories.map((category) => (
             <Button
@@ -277,13 +286,13 @@ export function MenuPage() {
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
             {filteredItems.length === items.length 
-              ? `Showing all ${items.length} items`
-              : `Showing ${filteredItems.length} of ${items.length} items`}
-            {searchQuery && ` for "${searchQuery}"`}
-            {selectedCategory && ` in ${selectedCategory}`}
+              ? t('menu.resultsSummaryAll', { count: items.length })
+              : t('menu.resultsSummarySome', { shown: filteredItems.length, total: items.length })}
+            {searchQuery && ` "${searchQuery}"`}
+            {selectedCategory && ` / ${selectedCategory}`}
           </p>
           <Badge variant="outline" className="text-xs">
-            {filteredItems.length} Results
+            {filteredItems.length} {t('menu.resultsLabel')}
           </Badge>
         </div>
       </motion.div>
@@ -293,10 +302,10 @@ export function MenuPage() {
         <motion.div variants={itemVariants}>
           {searchQuery || selectedCategory ? (
             <EmptyState
-              title="No Items Found"
+              title={t('common.noItemsFoundTitle')}
               message={`No items match your current filters${searchQuery ? ` for "${searchQuery}"` : ''}${selectedCategory ? ` in ${selectedCategory}` : ''}.`}
               action={{
-                label: "Clear Filters",
+                label: t('common.clearFilters'),
                 onClick: () => {
                   setSearchQuery("")
                   setSelectedCategory(null)
@@ -305,10 +314,10 @@ export function MenuPage() {
             />
           ) : (
             <EmptyState
-              title="No Menu Items"
-              message="The menu is currently empty. Please check back later."
+              title={t('menu.emptyNoItemsTitle')}
+              message={t('menu.emptyNoItemsDesc')}
               action={{
-                label: "Refresh",
+                label: t('common.refresh'),
                 onClick: refetch
               }}
             />
@@ -376,7 +385,7 @@ export function MenuPage() {
                             aria-label={`View ${item.name} details and AR experience`}
                           >
                             <Sparkles className="h-4 w-4 mr-1" />
-                            View AR
+                            {t('common.viewAr')}
                           </Link>
                         </Button>
                       ) : (
@@ -385,7 +394,7 @@ export function MenuPage() {
                             to={`/menu/${item.id}`}
                             aria-label={`View ${item.name} details`}
                           >
-                            Details
+                            {t('common.details')}
                           </Link>
                         </Button>
                       )}
@@ -409,7 +418,7 @@ export function MenuPage() {
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
             aria-label="Scroll to top of page"
           >
-            Back to Top
+            {t('common.backToTop')}
             <ArrowRight className="h-4 w-4 ml-2 rotate-[-90deg]" />
           </Button>
         </motion.div>

@@ -5,6 +5,7 @@ import { ToastProvider } from '@/components/ui'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 // import { RouteDebugger } from '@/components/RouteDebugger'
 import { ThemeProvider } from '@/contexts/ThemeContext'
+import { LanguageProvider } from '@/contexts/LanguageContext'
 import './App.css'
 
 // Navigation Monitor Component to handle navigation issues
@@ -42,13 +43,15 @@ function App() {
   return (
     <ErrorBoundary>
       <ThemeProvider>
-        <Router>
-          <NavigationMonitor />
-          {/* <RouteDebugger /> */}
-          <ToastProvider>
-            <AppRoutes />
-          </ToastProvider>
-        </Router>
+        <LanguageProvider>
+          <Router>
+            <NavigationMonitor />
+            {/* <RouteDebugger /> */}
+            <ToastProvider>
+              <AppRoutes />
+            </ToastProvider>
+          </Router>
+        </LanguageProvider>
       </ThemeProvider>
     </ErrorBoundary>
   )

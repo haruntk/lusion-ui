@@ -2,19 +2,20 @@ import { Link } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Github, Twitter, Mail, Heart } from "lucide-react"
 import { APP_CONFIG } from "@/utils/constants"
+import { useLanguage } from "@/hooks/useLanguage"
 
-const footerLinks = {
+const baseFooterLinks = {
   navigation: [
-    { label: "Home", href: "/" },
-    { label: "Menu", href: "/menu" },
-    { label: "About", href: "/about" },
-    { label: "Contact", href: "/contact" },
+    { key: "common.home", href: "/" },
+    { key: "common.menu", href: "/menu" },
+    { key: "common.about", href: "/about" },
+    { key: "about.contactUs", href: "/contact" },
   ],
   support: [
-    { label: "Help Center", href: "#" },
-    { label: "Privacy Policy", href: "#" },
-    { label: "Terms of Service", href: "#" },
-    { label: "Contact Us", href: "/contact" },
+    { key: "footer.helpCenter", href: "#" },
+    { key: "footer.privacyPolicy", href: "#" },
+    { key: "footer.termsOfService", href: "#" },
+    { key: "footer.contactUs", href: "/contact" },
   ],
   social: [
     { label: "GitHub", href: "#", icon: <Github className="h-5 w-5" /> },
@@ -24,6 +25,8 @@ const footerLinks = {
 }
 
 export function Footer() {
+  const { t } = useLanguage()
+  
   return (
     <footer className="border-t bg-muted/30">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -45,7 +48,7 @@ export function Footer() {
               {APP_CONFIG.DESCRIPTION}
             </p>
             <p className="text-xs text-muted-foreground">
-              Transforming dining experiences with cutting-edge AR technology.
+              {t('footer.transformingDining')}
             </p>
           </motion.div>
 
@@ -57,9 +60,9 @@ export function Footer() {
             viewport={{ once: true }}
             className="space-y-4"
           >
-            <h3 className="text-sm font-semibold text-foreground">Navigation</h3>
+            <h3 className="text-sm font-semibold text-foreground">{t('footer.navigation')}</h3>
             <div className="space-y-3">
-              {footerLinks.navigation.map((link, index) => (
+              {baseFooterLinks.navigation.map((link, index) => (
                 <motion.div
                   key={`nav-${index}-${link.href}`}
                   whileHover={{ x: 4 }}
@@ -69,7 +72,7 @@ export function Footer() {
                     to={link.href}
                     className="block text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                   >
-                    {link.label}
+                    {t(link.key)}
                   </Link>
                 </motion.div>
               ))}
@@ -86,9 +89,9 @@ export function Footer() {
           >
             {/* Support */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Support</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t('footer.support')}</h3>
               <div className="space-y-3">
-                {footerLinks.support.map((link, index) => (
+                {baseFooterLinks.support.map((link, index) => (
                   <motion.div
                     key={`support-${index}-${link.href}`}
                     whileHover={{ x: 4 }}
@@ -98,7 +101,7 @@ export function Footer() {
                       href={link.href}
                       className="block text-sm text-muted-foreground hover:text-primary transition-colors duration-200"
                     >
-                      {link.label}
+                      {t(link.key)}
                     </a>
                   </motion.div>
                 ))}
@@ -107,9 +110,9 @@ export function Footer() {
 
             {/* Social */}
             <div className="space-y-4">
-              <h3 className="text-sm font-semibold text-foreground">Connect</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t('footer.connect')}</h3>
               <div className="flex space-x-3">
-                {footerLinks.social.map((social, index) => (
+                {baseFooterLinks.social.map((social, index) => (
                   <motion.a
                     key={`social-${index}-${social.label}`}
                     href={social.href}
@@ -135,12 +138,7 @@ export function Footer() {
           className="mt-12 pt-8 border-t flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0"
         >
           <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <span>© {new Date().getFullYear()} {APP_CONFIG.NAME}. All rights reserved.</span>
-          </div>
-          <div className="flex items-center space-x-1 text-sm text-muted-foreground">
-            <span>Made with</span>
-            <Heart className="h-4 w-4 text-red-500 fill-current" />
-            <span>for amazing dining experiences</span>
+            <span>© {new Date().getFullYear()} {APP_CONFIG.NAME}. {t('footer.allRightsReserved')}</span>
           </div>
         </motion.div>
       </div>

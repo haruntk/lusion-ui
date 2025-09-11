@@ -17,6 +17,7 @@ import {
   Badge
 } from "@/components/ui"
 import { Link } from "react-router-dom"
+import { useLanguage } from '@/hooks/useLanguage'
 
 const pageVariants = {
   initial: { opacity: 0, y: 20 },
@@ -44,8 +45,9 @@ const itemVariants = {
 }
 
 export function AboutPage() {
+  const { t } = useLanguage()
   React.useEffect(() => {
-    document.title = "About Us - Lusion AR Dining"
+    document.title = t('about.title') + ' - Lusion AR Dining'
   }, [])
 
   return (
@@ -59,17 +61,17 @@ export function AboutPage() {
       <motion.section variants={itemVariants} className="text-center py-16">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            About <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold" 
+            {t('about.heroTitlePrefix')} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold" 
                         style={{ 
                           WebkitBackgroundClip: 'text', 
                           WebkitTextFillColor: 'transparent',
                           backgroundImage: 'linear-gradient(to right, rgb(37 99 235), rgb(147 51 234))',
+                          // @ts-ignore - fallbacks is not a valid property
                           fallbacks: [{ color: 'rgb(37 99 235)' }]
                         }}>Lusion</span>
           </h1>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
-            We're revolutionizing the dining experience through cutting-edge augmented reality technology, 
-            making every meal an immersive journey.
+            {t('about.heroParagraph')}
           </p>
         </div>
       </motion.section>
@@ -80,12 +82,11 @@ export function AboutPage() {
           <Card className="h-full">
             <CardHeader>
               <Target className="h-12 w-12 text-primary mb-4" />
-              <CardTitle className="text-2xl">Our Mission</CardTitle>
+              <CardTitle className="text-2xl">{t('about.missionTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                To transform traditional dining into an interactive, immersive experience where customers 
-                can visualize their food in 3D before ordering, reducing uncertainty and enhancing satisfaction.
+                {t('about.missionText')}
               </p>
             </CardContent>
           </Card>
@@ -93,12 +94,11 @@ export function AboutPage() {
           <Card className="h-full">
             <CardHeader>
               <Sparkles className="h-12 w-12 text-primary mb-4" />
-              <CardTitle className="text-2xl">Our Vision</CardTitle>
+              <CardTitle className="text-2xl">{t('about.visionTitle')}</CardTitle>
             </CardHeader>
             <CardContent>
               <p className="text-muted-foreground leading-relaxed">
-                To become the global leader in AR dining technology, making immersive food experiences 
-                accessible to restaurants worldwide and setting new standards for customer engagement.
+                {t('about.visionText')}
               </p>
             </CardContent>
           </Card>
@@ -108,9 +108,9 @@ export function AboutPage() {
       {/* Features */}
       <motion.section variants={itemVariants} className="py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">What Makes Us Different</h2>
+          <h2 className="text-3xl font-bold mb-4">{t('about.featuresTitle')}</h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Our innovative approach combines technology with culinary artistry
+            {t('about.featuresSubtitle')}
           </p>
         </div>
 
@@ -118,20 +118,20 @@ export function AboutPage() {
           {[
             {
               icon: Award,
-              title: "Industry Leading",
-              description: "First-to-market AR dining platform with proven results",
+              title: t('about.featureIndustry'),
+              description: t('about.featureIndustryDesc'),
               badge: "Innovation"
             },
             {
               icon: Users,
-              title: "Customer Focused",
-              description: "Designed with user experience and accessibility at the forefront",
+              title: t('about.featureCustomer'),
+              description: t('about.featureCustomerDesc'),
               badge: "UX Excellence"
             },
             {
               icon: Sparkles,
-              title: "Cutting Edge",
-              description: "Latest AR technology supporting iOS, Android, and web platforms",
+              title: t('about.featureTech'),
+              description: t('about.featureTechDesc'),
               badge: "Technology"
             }
           ].map((feature, index) => (
@@ -165,24 +165,24 @@ export function AboutPage() {
       <motion.section variants={itemVariants} className="py-16 text-center">
         <Card className="max-w-2xl mx-auto">
           <CardHeader>
-            <CardTitle className="text-2xl">Get in Touch</CardTitle>
+            <CardTitle className="text-2xl">{t('about.contactTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <p className="text-muted-foreground">
-              Interested in bringing AR dining to your restaurant? We'd love to hear from you.
+              {t('about.contactDesc')}
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild className="gap-2">
                 <Link to="/contact">
                   <Mail className="h-4 w-4" />
-                  Contact Us
+                  {t('about.contactUs')}
                 </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2">
                 <Link to="/menu">
                   <ArrowRight className="h-4 w-4" />
-                  Try Our Menu
+                  {t('about.tryMenu')}
                 </Link>
               </Button>
             </div>

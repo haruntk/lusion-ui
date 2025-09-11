@@ -4,45 +4,21 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Menu, X, Home, Package, QrCode, Info, Sparkles } from "lucide-react"
 import { Button, ThemeToggle } from "@/components/ui"
 import { cn } from "@/utils"
+import { LanguageMenu } from '@/components/ui/LanguageMenu'
+import { useLanguage } from '@/hooks/useLanguage'
 
-interface NavItem {
-  label: string
-  href: string
-  icon: React.ReactNode
-}
-
-const navItems: NavItem[] = [
-  {
-    label: "Home",
-    href: "/",
-    icon: <Home className="h-4 w-4" />,
-  },
-  {
-    label: "Menu",
-    href: "/menu",
-    icon: <Package className="h-4 w-4" />,
-  },
-  {
-    label: "AR Experience",
-    href: "/ar-view",
-    icon: <Sparkles className="h-4 w-4" />,
-  },
-  {
-    label: "QR Codes",
-    href: "/qr",
-    icon: <QrCode className="h-4 w-4" />,
-  },
-  {
-    label: "About",
-    href: "/about",
-    icon: <Info className="h-4 w-4" />,
-  },
-]
+const baseNavItems = [
+  { key: 'common.home', href: '/', icon: <Home className="h-4 w-4" /> },
+  { key: 'common.menu', href: '/menu', icon: <Package className="h-4 w-4" /> },
+  { key: 'common.arExperience', href: '/ar-view', icon: <Sparkles className="h-4 w-4" /> },
+  { key: 'common.qrCodes', href: '/qr', icon: <QrCode className="h-4 w-4" /> },
+  { key: 'common.about', href: '/about', icon: <Info className="h-4 w-4" /> },
+] as const
 
 export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false)
   const location = useLocation()
-
+  const { t } = useLanguage()
   // Close mobile menu when route changes
   React.useEffect(() => {
     setIsOpen(false)
@@ -72,7 +48,7 @@ export function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             <div className="flex items-center space-x-1">
-              {navItems.map((item) => {
+              {baseNavItems.map((item) => {
                 const isActive = location.pathname === item.href
                 return (
                   <motion.div
@@ -90,7 +66,7 @@ export function Navbar() {
                       )}
                     >
                       {item.icon}
-                      <span>{item.label}</span>
+                      <span>{t(item.key)}</span>
                       {isActive && (
                         <motion.div
                           layoutId="navbar-indicator"
@@ -104,14 +80,14 @@ export function Navbar() {
                 )
               })}
             </div>
-            
-            {/* Theme Toggle */}
             <ThemeToggle variant="compact" />
+            <LanguageMenu className="ml-2" />
           </div>
 
           {/* Mobile Controls */}
           <div className="md:hidden flex items-center space-x-2">
             <ThemeToggle variant="compact" />
+            <LanguageMenu />
             <motion.div
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
@@ -161,7 +137,7 @@ export function Navbar() {
               className="md:hidden overflow-hidden"
             >
               <div className="px-2 pt-2 pb-3 space-y-1 border-t">
-                {navItems.map((item, index) => {
+                {baseNavItems.map((item, index) => {
                   const isActive = location.pathname === item.href
                   return (
                     <motion.div
@@ -180,11 +156,14 @@ export function Navbar() {
                         )}
                       >
                         {item.icon}
-                        <span>{item.label}</span>
+                        <span>{t(item.key)}</span>
                       </Link>
                     </motion.div>
                   )
                 })}
+                <div className="flex items-center px-3 py-3">
+                  <LanguageMenu />
+                </div>
               </div>
             </motion.div>
           )}

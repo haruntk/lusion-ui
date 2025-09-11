@@ -6,8 +6,11 @@ import { useItem, useItems } from "@/hooks"
 import { startArSession } from "@/api/ar"
 import { motion } from "framer-motion"
 import { ArViewer } from "@/components/ar"
+import { useLanguage } from '@/hooks/useLanguage'
+import { localizeItemFields } from '@/utils/i18n'
 
 export function ArViewPage() {
+  const { t } = useLanguage()
   const { itemId: paramItemId } = useParams<{ itemId: string }>()
   const [searchParams] = useSearchParams()
   const queryItemId = searchParams.get("item_id")
@@ -45,26 +48,26 @@ export function ArViewPage() {
   // Show error state only if there's a real error or no items available after loading
   if (!loading && !targetItemId && allItems && allItems.length === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-slate-800/80 border-slate-700/50">
+      <div className="min-h-screen bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 text-foreground flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-center text-white">AR Experience Unavailable</CardTitle>
+            <CardTitle className="text-center">{t('ar.unavailableTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-slate-300">
-              Currently no AR model available to display. Please try again later.
+            <p className="text-muted-foreground">
+              {t('ar.unavailableDesc')}
             </p>
             <div className="space-y-2">
               <Button asChild className="gap-2 w-full">
                 <Link to="/menu">
                   <ArrowLeft className="h-4 w-4" />
-                  Explore Menu
+                  {t('common.exploreMenu')}
                 </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2 w-full">
                 <Link to="/">
                   <ArrowLeft className="h-4 w-4" />
-                  Home Page
+                  {t('common.homePage')}
                 </Link>
               </Button>
             </div>
@@ -76,8 +79,8 @@ export function ArViewPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 flex items-center justify-center">
-        <div className="text-center text-white">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 flex items-center justify-center">
+        <div className="text-center text-foreground">
           <motion.div
             animate={{ 
               rotate: 360,
@@ -92,8 +95,8 @@ export function ArViewPage() {
             <Smartphone className="h-12 w-12 text-purple-400" />
             <div className="absolute inset-0 bg-purple-400/20 rounded-full blur-lg"></div>
           </motion.div>
-          <h2 className="text-xl font-semibold mb-2">Loading AR Experience...</h2>
-          <p className="text-slate-300">Preparing 3D model</p>
+          <h2 className="text-xl font-semibold mb-2">{t('ar.loadingTitle')}</h2>
+          <p className="text-muted-foreground">{t('ar.loadingSubtitle')}</p>
         </div>
       </div>
     )
@@ -101,26 +104,26 @@ export function ArViewPage() {
 
   if (error || (!loading && !item && targetItemId)) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-slate-800/80 border-slate-700/50">
+      <div className="min-h-screen bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 text-foreground flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-center text-white">AR Model Could Not Load</CardTitle>
+            <CardTitle className="text-center">{t('ar.errorTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-slate-300">
-              {error || "The requested AR model cannot be loaded. Please try another model."}
+            <p className="text-muted-foreground">
+              {error || t('ar.errorDesc')}
             </p>
             <div className="space-y-2">
               <Button asChild className="gap-2 w-full">
                 <Link to="/menu">
                   <ArrowLeft className="h-4 w-4" />
-                  Explore Menu
+                  {t('common.exploreMenu')}
                 </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2 w-full">
                 <Link to="/">
                   <ArrowLeft className="h-4 w-4" />
-                  Home Page
+                  {t('common.homePage')}
                 </Link>
               </Button>
             </div>
@@ -133,26 +136,26 @@ export function ArViewPage() {
   // Safety check - if we get to this point, item should exist
   if (!item) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900 text-white flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-slate-800/80 border-slate-700/50">
+      <div className="min-h-screen bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900 text-foreground flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-center text-white">AR Model Not Found</CardTitle>
+            <CardTitle className="text-center">{t('ar.notFoundTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-slate-300">
-              AR model cannot be loaded. Please refresh the page or try another model.
+            <p className="text-muted-foreground">
+              {t('ar.notFoundDesc')}
             </p>
             <div className="space-y-2">
               <Button asChild className="gap-2 w-full">
                 <Link to="/menu">
                   <ArrowLeft className="h-4 w-4" />
-                  Explore Menu
+                  {t('common.exploreMenu')}
                 </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2 w-full">
                 <Link to="/">
                   <ArrowLeft className="h-4 w-4" />
-                  Home Page
+                  {t('common.homePage')}
                 </Link>
               </Button>
             </div>
@@ -207,17 +210,17 @@ export function ArViewPage() {
         className="absolute top-0 left-0 right-0 z-50 p-6"
       >
         <div className="flex items-center justify-between max-w-6xl mx-auto">
-          <Button asChild variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 transition-all">
+          <Button asChild variant="ghost" size="sm" className="hover:bg-foreground/10 transition-all">
             <Link to="/menu" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <div className="text-center">
-            <Badge variant="secondary" className="text-xs px-3 py-1 bg-white/10 text-white/90 border-white/20">
-              AR Experience
+            <Badge variant="secondary" className="text-xs px-3 py-1">
+              {t('common.arExperience')}
             </Badge>
           </div>
-          <Button asChild variant="ghost" size="sm" className="text-white/80 hover:text-white hover:bg-white/10 transition-all">
+          <Button asChild variant="ghost" size="sm" className="hover:bg-foreground/10 transition-all">
             <Link to={`/menu/${item.id}`} className="gap-2">
               <Info className="h-4 w-4" />
             </Link>
@@ -241,46 +244,46 @@ export function ArViewPage() {
             <motion.div variants={itemVariants} className="text-center space-y-6">
               {/* Item Title & Category */}
               <div className="space-y-3">
-                <h1 className="text-3xl md:text-4xl font-bold text-white">
-                  {item.name}
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                  {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').name}
                 </h1>
                 <div className="flex items-center justify-center gap-4">
                   <Badge variant="secondary" className="px-4 py-1 text-sm">
-                    {item.category}
+                    {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').category}
                   </Badge>
-                  <span className="text-2xl font-bold text-white">₺{item.price}</span>
+                  <span className="text-2xl font-bold text-foreground">₺{item.price}</span>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-lg text-gray-300 leading-relaxed max-w-lg mx-auto">
-                {item.description}
+              <p className="text-lg text-foreground/80 leading-relaxed max-w-lg mx-auto">
+                {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').description}
               </p>
 
               {/* AR Features - Simplified */}
               <div className="flex flex-wrap items-center justify-center gap-6 py-6">
-                <div className="flex items-center gap-2 text-white/80">
+                <div className="flex items-center gap-2 text-foreground/80">
                   <div className="h-1.5 w-1.5 bg-green-400 rounded-full"></div>
-                  <span className="text-sm">360° View</span>
+                  <span className="text-sm">{t('ar.features.view360')}</span>
                 </div>
-                <div className="flex items-center gap-2 text-white/80">
+                <div className="flex items-center gap-2 text-foreground/80">
                   <div className="h-1.5 w-1.5 bg-green-400 rounded-full"></div>
-                  <span className="text-sm">Real Scale</span>
+                  <span className="text-sm">{t('ar.features.realScale')}</span>
                 </div>
-                <div className="flex items-center gap-2 text-white/80">
+                <div className="flex items-center gap-2 text-foreground/80">
                   <div className="h-1.5 w-1.5 bg-green-400 rounded-full"></div>
-                  <span className="text-sm">HD Quality</span>
+                  <span className="text-sm">{t('ar.features.hd')}</span>
                 </div>
               </div>
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
                 <Button onClick={handleStartAr} size="lg" className="px-8">
-                  Start AR Experience
+                  {t('ar.ctaStart')}
                 </Button>
-                <Button asChild variant="outline" size="lg" className="px-8 bg-white/10 border-white/20 text-white hover:bg-white/20">
+                <Button asChild variant="outline" size="lg" className="px-8">
                   <Link to="/menu">
-                    Return to Menu
+                    {t('common.returnToMenu')}
                   </Link>
                 </Button>
               </div>

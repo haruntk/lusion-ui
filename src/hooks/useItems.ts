@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { itemsApi, ApiError, ValidationApiError } from '@/api'
 import { ItemSchema, ItemSearchParamsSchema, type Item, type Category, type ItemSearchParams } from '@/types/item.schema'
 import { z } from 'zod'
+import { useLanguage } from '@/hooks/useLanguage'
 
 interface UseItemsState {
   data: Item[]
@@ -32,6 +33,8 @@ export function useItems(options: UseItemsOptions = {}): UseItemsReturn {
     enabled = true, 
     staleTime = 5 * 60 * 1000 // 5 minutes default
   } = options
+
+  const { lang } = useLanguage()
 
   const [state, setState] = useState<UseItemsState>({
     data: [],
@@ -65,11 +68,15 @@ export function useItems(options: UseItemsOptions = {}): UseItemsReturn {
         }
       }
 
-      // Fetch items and categories in parallel
-      const [items, categories] = await Promise.all([
-        itemsApi.getAll(validatedParams),
-        itemsApi.getCategories(),
-      ])
+      // Fetch items (already translated by backend)
+      const items = await itemsApi.getAll({ ...(validatedParams || {}), lang })
+      // Derive categories from translated items so chips reflect current language
+      const categoryMap = new Map<string, number>()
+      items.forEach(it => {
+        const key = it.category
+        categoryMap.set(key, (categoryMap.get(key) || 0) + 1)
+      })
+      const categories = Array.from(categoryMap.entries()).map(([name, count]) => ({ name, count }))
 
       // Validate response data individually to handle partial failures
       const validatedItems = items
@@ -107,7 +114,7 @@ export function useItems(options: UseItemsOptions = {}): UseItemsReturn {
         error: errorMessage,
       }))
     }
-  }, [enabled, params]) // React.memo can help with object reference changes at component level
+  }, [enabled, params, lang]) // include lang so list refetches on language change
 
   // Client-side filtering helpers
   const getItemsByCategory = useCallback((category: string): Item[] => {
@@ -134,14 +141,13 @@ export function useItems(options: UseItemsOptions = {}): UseItemsReturn {
     return Date.now() - state.lastFetch.getTime() > staleTime
   }, [state.lastFetch, staleTime])
 
-  // Initial fetch - run when component mounts
+  // Fetch on mount and whenever language changes
   useEffect(() => {
-    // Fetch if enabled and we don't have data yet
-    if (enabled && state.data.length === 0 && !state.loading && !state.error) {
+    if (enabled) {
       fetchItems()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [enabled]) // Only depend on enabled to run once
+  }, [enabled, lang])
 
   // Disable auto-refetch completely to prevent continuous requests
   // useEffect(() => {

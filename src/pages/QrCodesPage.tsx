@@ -22,6 +22,7 @@ import {
 import { ErrorState, EmptyState } from "@/components/common"
 import { useItems } from "@/hooks"
 import { Link } from "react-router-dom"
+import { useLanguage } from '@/hooks/useLanguage'
 import { logger } from "@/utils"
 
 const pageVariants = {
@@ -52,9 +53,10 @@ const itemVariants = {
 export function QrCodesPage() {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
+  const { t } = useLanguage()
 
   React.useEffect(() => {
-    document.title = "QR Codes - Lusion AR Dining"
+    document.title = t('qr.headerTitle') + ' - Lusion AR Dining'
   }, [])
 
   // Memoize options to prevent infinite re-renders
@@ -116,8 +118,8 @@ export function QrCodesPage() {
       >
         <div className="text-center py-16">
           <Spinner size="lg" className="mx-auto mb-4" />
-          <h1 className="text-2xl font-semibold mb-2">Loading QR Codes</h1>
-          <p className="text-muted-foreground">Preparing AR QR codes for all menu items...</p>
+          <h1 className="text-2xl font-semibold mb-2">{t('qr.loadingTitle')}</h1>
+          <p className="text-muted-foreground">{t('qr.loadingSubtitle')}</p>
         </div>
       </motion.div>
     )
@@ -132,7 +134,7 @@ export function QrCodesPage() {
         className="container mx-auto px-4 py-8"
       >
         <ErrorState
-          title="Failed to Load QR Codes"
+          title={t('qr.failedTitle')}
           message={error}
           retry={refetch}
         />
@@ -149,10 +151,10 @@ export function QrCodesPage() {
         className="container mx-auto px-4 py-8"
       >
         <EmptyState
-          title="No QR Codes Available"
-          message="No menu items available to generate QR codes."
+          title={t('qr.emptyTitle')}
+          message={t('qr.emptyDesc')}
           action={{
-            label: "Refresh",
+            label: t('common.refresh'),
             onClick: refetch
           }}
         />
@@ -172,17 +174,17 @@ export function QrCodesPage() {
         <Button asChild variant="ghost" className="mb-6 gap-2">
           <Link to="/">
             <ArrowLeft className="h-4 w-4" />
-            Back to Home
+            {t('common.goHome')}
           </Link>
         </Button>
         
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              QR Codes
+              {t('qr.headerTitle')}
             </h1>
             <p className="text-muted-foreground text-lg">
-              Download QR codes for AR experiences of all menu items
+              {t('qr.headerSubtitle')}
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -211,7 +213,7 @@ export function QrCodesPage() {
         <div className="relative max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
-            placeholder="Search items for QR codes..."
+            placeholder={t('qr.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -223,10 +225,10 @@ export function QrCodesPage() {
       {filteredItems.length === 0 ? (
         <motion.div variants={itemVariants}>
           <EmptyState
-            title="No Items Found"
+            title={t('common.noItemsFoundTitle')}
             message={`No items match "${searchQuery}". Try adjusting your search.`}
             action={{
-              label: "Clear Search",
+              label: t('common.clearSearch'),
               onClick: () => setSearchQuery("")
             }}
           />
@@ -281,7 +283,7 @@ export function QrCodesPage() {
                       onClick={() => handleDownloadQr(item.id, item.name)}
                     >
                       <Download className="h-3 w-3" />
-                      Download
+                      {t('common.download')}
                     </Button>
                     <Button
                       size="sm"
@@ -307,14 +309,14 @@ export function QrCodesPage() {
                       }}
                     >
                       <Share2 className="h-3 w-3" />
-                      Share
+                      {t('common.share')}
                     </Button>
                   </div>
                   
                   <Button asChild size="sm" className="w-full gap-2">
                     <Link to={`/menu/${item.id}`}>
                       <QrCode className="h-3 w-3" />
-                      View Item
+                      {t('common.viewItem')}
                     </Link>
                   </Button>
                 </CardContent>

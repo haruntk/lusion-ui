@@ -15,6 +15,7 @@ import {
   CardHeader, 
   CardTitle
 } from "@/components/ui"
+import { useLanguage } from '@/hooks/useLanguage'
 
 const pageVariants = {
   initial: { opacity: 0 },
@@ -44,9 +45,10 @@ const itemVariants = {
 }
 
 export function SimpleWelcomePage() {
+  const { t } = useLanguage()
   React.useEffect(() => {
     // Set document title for accessibility and SEO  
-    document.title = "Welcome to Lusion AR Dining - Experience Food in 3D"
+    document.title = t('welcome.documentTitle')
   }, [])
 
   return (
@@ -65,12 +67,12 @@ export function SimpleWelcomePage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.2, duration: 0.6, ease: "easeOut" }}
           >
-            Experience <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold" 
+            {t('welcome.heroTitle1')} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold" 
                         style={{ 
                           WebkitBackgroundClip: 'text', 
                           WebkitTextFillColor: 'transparent',
                           backgroundImage: 'linear-gradient(to right, rgb(37 99 235), rgb(147 51 234))'
-                        }}>Dining in AR</span>
+                        }}>{t('welcome.heroTitle2')}</span>
           </motion.h1>
           <motion.p 
             className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto"
@@ -78,8 +80,7 @@ export function SimpleWelcomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            Transform your restaurant experience with immersive augmented reality. 
-            View our menu items in 3D before you order.
+            {t('welcome.heroParagraph')}
           </motion.p>
           <motion.div 
             className="flex flex-col sm:flex-row gap-4 justify-center"
@@ -93,7 +94,7 @@ export function SimpleWelcomePage() {
             >
               <Button asChild size="lg" className="gap-2">
                 <Link to="/menu" aria-label="Explore our AR menu items">
-                  Explore Menu
+                  {t('welcome.ctaExplore')}
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
               </Button>
@@ -104,7 +105,7 @@ export function SimpleWelcomePage() {
             >
               <Button asChild variant="outline" size="lg">
                 <Link to="/ar-view" aria-label="Try AR dining experience">
-                  Try AR Experience
+                  {t('welcome.ctaTryAr')}
                 </Link>
               </Button>
             </motion.div>
@@ -126,7 +127,7 @@ export function SimpleWelcomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.5 }}
           >
-            Why Choose AR Dining?
+            {t('welcome.whyTitle')}
           </motion.h2>
           <motion.p 
             className="text-lg text-muted-foreground max-w-2xl mx-auto"
@@ -134,7 +135,7 @@ export function SimpleWelcomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.0, duration: 0.5 }}
           >
-            Our innovative AR technology brings your dining experience to the next level
+            {t('welcome.whySubtitle')}
           </motion.p>
         </div>
         
@@ -142,20 +143,20 @@ export function SimpleWelcomePage() {
           {[
             {
               icon: Sparkles,
-              title: "Immersive Experience",
-              description: "See your food in 3D before ordering. Get a realistic preview of every dish.",
+              title: t('welcome.featureImmersive'),
+              description: t('welcome.featureImmersiveDesc'),
               delay: 1.2
             },
             {
               icon: Smartphone,
-              title: "Mobile Ready", 
-              description: "Works seamlessly on iOS and Android devices. No app installation required.",
+              title: t('welcome.featureMobile'), 
+              description: t('welcome.featureMobileDesc'),
               delay: 1.4
             },
             {
               icon: QrCode,
-              title: "Easy Access",
-              description: "Simply scan a QR code to instantly view any menu item in augmented reality.",
+              title: t('welcome.featureEasy'),
+              description: t('welcome.featureEasyDesc'),
               delay: 1.6
             }
           ].map((feature) => (
@@ -207,10 +208,10 @@ export function SimpleWelcomePage() {
           <Card className="max-w-2xl mx-auto hover:shadow-xl transition-shadow duration-300">
             <CardHeader>
               <CardTitle id="cta-title" className="text-2xl md:text-3xl">
-                Ready to Get Started?
+                {t('welcome.ctaCardTitle')}
               </CardTitle>
               <CardDescription className="text-lg">
-                Explore our full menu and experience the future of dining today.
+                {t('welcome.ctaCardDesc')}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -221,7 +222,7 @@ export function SimpleWelcomePage() {
                 >
                   <Button asChild size="lg" className="gap-2">
                     <Link to="/menu" aria-label="Browse our AR-enabled menu items">
-                      Browse Menu Items
+                      {t('welcome.browseMenuItems')}
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </Link>
                   </Button>
@@ -232,7 +233,7 @@ export function SimpleWelcomePage() {
                 >
                   <Button asChild variant="outline" size="lg" className="gap-2">
                     <Link to="/about" aria-label="Learn more about us">
-                      Learn More
+                      {t('welcome.learnMore')}
                       <Sparkles className="h-4 w-4" aria-hidden="true" />
                     </Link>
                   </Button>

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom"
 import { motion } from "framer-motion"
 import { Home, Search, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui"
+import { useLanguage } from '@/hooks/useLanguage'
 
 const pageVariants = {
   initial: { opacity: 0, y: 20, scale: 0.95 },
@@ -41,10 +42,11 @@ const floatingVariants = {
 export function NotFoundPage() {
   const location = useLocation()
   const attemptedPath = location.pathname
+  const { t } = useLanguage()
 
   React.useEffect(() => {
     // Set document title for accessibility
-    document.title = "Page Not Found - Lusion AR Dining"
+    document.title = t('notFound.title') + ' - Lusion AR Dining'
   }, [])
 
   return (
@@ -90,18 +92,18 @@ export function NotFoundPage() {
           transition={{ delay: 0.3, duration: 0.5 }}
         >
           <h1 className="text-3xl md:text-4xl font-bold mb-4 text-foreground">
-            Oops! Page Not Found
+            {t('notFound.title')}
           </h1>
           <p className="text-lg text-muted-foreground mb-2">
-            The page you're looking for doesn't exist.
+            {t('notFound.desc1')}
           </p>
           {attemptedPath && (
             <p className="text-sm text-muted-foreground mb-8 font-mono bg-muted/50 px-3 py-1 rounded">
-              Attempted path: <span className="text-destructive">{attemptedPath}</span>
+              {t('notFound.attemptedPath')} <span className="text-destructive">{attemptedPath}</span>
             </p>
           )}
           <p className="text-muted-foreground mb-8">
-            It might have been moved, deleted, or you entered the wrong URL.
+            {t('notFound.desc2')}
           </p>
         </motion.div>
         
@@ -119,7 +121,7 @@ export function NotFoundPage() {
             <Button asChild size="lg" className="gap-2">
               <Link to="/">
                 <Home className="h-4 w-4" aria-hidden="true" />
-                Go Home
+                {t('common.goHome')}
               </Link>
             </Button>
           </motion.div>
@@ -131,7 +133,7 @@ export function NotFoundPage() {
             <Button asChild variant="outline" size="lg" className="gap-2">
               <Link to="/menu">
                 <Search className="h-4 w-4" aria-hidden="true" />
-                Browse Menu
+                {t('common.browseMenu')}
               </Link>
             </Button>
           </motion.div>
@@ -145,12 +147,12 @@ export function NotFoundPage() {
           transition={{ delay: 0.7, duration: 0.5 }}
         >
           <p className="text-sm text-muted-foreground">
-            Need help? Try searching our menu or{" "}
+            {t('notFound.needHelp')} 
             <Link 
               to="/contact" 
               className="text-primary hover:underline focus:underline focus:outline-none"
             >
-              contact us
+              {t('notFound.contactUs')}
             </Link>
             .
           </p>

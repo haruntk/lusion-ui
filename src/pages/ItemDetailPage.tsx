@@ -26,7 +26,8 @@ import {
   useToast
 } from "@/components/ui"
 import { ErrorState } from "@/components/common"
-import { useItem, useQr, useArSession } from "@/hooks"
+import { useItem, useQr, useArSession, useLanguage } from "@/hooks"
+import { localizeItemFields } from '@/utils/i18n'
 
 const pageVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -55,6 +56,7 @@ const itemVariants = {
 export function ItemDetailPage() {
   const { id } = useParams<{ id: string }>()
   const { toast } = useToast()
+  const { t, lang } = useLanguage()
   
   // Yerel state'i tanımla
   interface LoadingState {
@@ -120,9 +122,9 @@ export function ItemDetailPage() {
       <div className="container mx-auto px-4 py-8">
         <div className="text-center py-16">
           <Spinner size="lg" className="mx-auto mb-4" />
-          <p className="text-lg text-muted-foreground">Loading item details...</p>
+          <p className="text-lg text-muted-foreground">{t('item.loadingTitle')}</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Fetching 3D models and AR configurations...
+            {t('item.loadingSubtitle')}
           </p>
         </div>
       </div>
@@ -134,8 +136,8 @@ export function ItemDetailPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <ErrorState
-          title="Item Not Found"
-          message="The requested menu item could not be found. It may have been removed or the ID is incorrect."
+          title={t('item.notFoundTitle')}
+          message={t('item.notFoundDesc')}
           retry={retryItem}
         />
       </div>
@@ -147,8 +149,8 @@ export function ItemDetailPage() {
     return (
       <div className="container mx-auto px-4 py-8">
         <ErrorState
-          title="Failed to Load Item"
-          message={itemError || "An unexpected error occurred while loading the item."}
+          title={t('item.failedTitle')}
+          message={itemError || t('item.failedDesc')}
           retry={retryItem}
         />
       </div>
@@ -265,8 +267,6 @@ export function ItemDetailPage() {
     }
   }
 
-
-
   return (
     <motion.div
       variants={pageVariants}
@@ -279,7 +279,7 @@ export function ItemDetailPage() {
         <Button asChild variant="ghost" className="mb-6 gap-2">
           <Link to="/menu">
             <ArrowLeft className="h-4 w-4" />
-            Back to Menu
+            {t('common.returnToMenu')}
           </Link>
         </Button>
       </motion.div>
@@ -322,7 +322,7 @@ export function ItemDetailPage() {
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <QrCode className="h-5 w-5" />
-                      AR QR Code
+                      {t('item.qrCode')}
                     </div>
                     {qrLoading && <Spinner size="sm" />}
                   </CardTitle>
@@ -358,7 +358,7 @@ export function ItemDetailPage() {
                         loading={qrLoading}
                         leftIcon={<QrCode className="h-4 w-4" />}
                       >
-                        Generate QR
+                        {t('item.generateQr')}
                       </Button>
                     )}
                     
@@ -371,7 +371,7 @@ export function ItemDetailPage() {
                           disabled={state.downloadLoading}
                           leftIcon={<Download className="h-4 w-4" />}
                         >
-                          Download
+                          {t('common.download')}
                         </Button>
                         
                         {canShare && (
@@ -383,7 +383,7 @@ export function ItemDetailPage() {
                             disabled={state.shareLoading}
                             leftIcon={<Share2 className="h-4 w-4" />}
                           >
-                            Share
+                            {t('common.share')}
                           </Button>
                         )}
                         
@@ -396,7 +396,7 @@ export function ItemDetailPage() {
                             disabled={state.copyLoading}
                             leftIcon={<Copy className="h-4 w-4" />}
                           >
-                            Copy Link
+                            {t('common.copyLink')}
                           </Button>
                         )}
                       </>
@@ -413,7 +413,7 @@ export function ItemDetailPage() {
                         onClick={refetchQr}
                         leftIcon={<RefreshCw className="h-4 w-4" />}
                       >
-                        Retry
+                        {t('common.retry')}
                       </Button>
                     </div>
                   )}
@@ -422,17 +422,17 @@ export function ItemDetailPage() {
                   {qrAnalytics && (
                     <div className="text-center space-y-1 mt-2">
                       <p className="text-xs text-muted-foreground">
-                        Scans: {qrAnalytics.totalScans || 0}
+                        {t('item.scans')}: {qrAnalytics.totalScans || 0}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        Unique scans: {qrAnalytics.uniqueScans || 0}
+                        {t('item.uniqueScans')}: {qrAnalytics.uniqueScans || 0}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        AR launches: {qrAnalytics.arLaunches || 0}
+                        {t('item.arLaunches')}: {qrAnalytics.arLaunches || 0}
                       </p>
                       {qrAnalytics.conversionRate > 0 && (
                         <p className="text-xs text-muted-foreground">
-                          Conversion rate: {Math.round((qrAnalytics.conversionRate || 0) * 100)}%
+                          {t('item.conversionRate')}: {Math.round((qrAnalytics.conversionRate || 0) * 100)}%
                         </p>
                       )}
                     </div>
@@ -449,7 +449,7 @@ export function ItemDetailPage() {
               <Card>
                 <CardHeader className="cursor-pointer" onClick={() => setIsModelDetailsExpanded(!isModelDetailsExpanded)}>
                   <CardTitle className="flex items-center justify-between">
-                    <span>3D Model Details</span>
+                    <span>{t('item.modelDetails')}</span>
                     {isModelDetailsExpanded ? (
                       <ChevronUp className="h-4 w-4 text-muted-foreground" />
                     ) : (
@@ -465,18 +465,18 @@ export function ItemDetailPage() {
                   </div>
                   {item.model_ios && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">iOS Format:</span>
+                      <span className="text-muted-foreground">{t('item.iosFormat')}</span>
                       <span className="font-medium">USDZ</span>
                     </div>
                   )}
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">AR Ready:</span>
+                    <span className="text-muted-foreground">{t('item.arReady')}</span>
                     <Badge variant="success" className="text-xs">
-                      ✓ Yes
+                      ✓ {t('item.yes')}
                     </Badge>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Platform Support:</span>
+                    <span className="text-muted-foreground">{t('item.platformSupport')}</span>
                     <div className="flex gap-1">
                       <Badge variant="outline" className="text-xs">iOS</Badge>
                       <Badge variant="outline" className="text-xs">Android</Badge>
@@ -494,15 +494,15 @@ export function ItemDetailPage() {
         <div className="space-y-6">
           <motion.div variants={itemVariants}>
             <div>
-              <h1 className="text-3xl font-bold mb-4">{item.name}</h1>
+              <h1 className="text-3xl font-bold mb-4">{localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').name}</h1>
               <div className="flex items-center gap-4 mb-4">
                 <span className="text-3xl font-bold text-primary">{item.price}</span>
                 <Badge variant="outline" className="capitalize text-sm px-3 py-1">
-                  {item.category}
+                  {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').category}
                 </Badge>
               </div>
               <p className="text-muted-foreground leading-relaxed text-lg">
-                {item.description}
+                {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').description}
               </p>
             </div>
           </motion.div>
@@ -515,7 +515,7 @@ export function ItemDetailPage() {
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Sparkles className="h-5 w-5" />
-                      AR Experience
+                      {t('common.arExperience')}
                     </div>
                     {arLoading && <Spinner size="sm" />}
                   </CardTitle>
@@ -527,19 +527,19 @@ export function ItemDetailPage() {
                       <div className="flex items-center space-x-2">
                         <Smartphone className="h-4 w-4 text-muted-foreground" />
                         <span className="text-sm">
-                          {deviceInfo.platform === 'ios' ? 'iOS Device' : 
-                           deviceInfo.platform === 'android' ? 'Android Device' : 
-                           'Desktop Browser'}
+                          {deviceInfo.platform === 'ios' ? t('item.deviceIos') : 
+                           deviceInfo.platform === 'android' ? t('item.deviceAndroid') : 
+                           t('item.deviceDesktop')}
                         </span>
                       </div>
                       <Badge variant="success">
-                        AR Experience Ready
+                        {t('item.arReadyBadge')}
                       </Badge>
                     </div>
                   )}
 
                   <p className="text-sm text-muted-foreground">
-                    View this item in augmented reality on your mobile device
+                    {t('item.viewOnMobile')}
                   </p>
                   
                   <div className="flex flex-col gap-3">
@@ -549,7 +549,7 @@ export function ItemDetailPage() {
                       size="lg"
                     >
                       <Smartphone className="h-5 w-5" />
-                      Start AR Experience
+                      {t('ar.ctaStart')}
                     </Button>
                   </div>
                   
@@ -561,8 +561,8 @@ export function ItemDetailPage() {
 
                   <p className="text-xs text-muted-foreground">
                     {deviceInfo?.isMobile 
-                      ? "Optimized for your mobile device" 
-                      : "Best experienced on mobile devices with AR support"}
+                      ? t('item.optimizedForMobile') 
+                      : t('item.bestOnMobile')}
                   </p>
                 </CardContent>
               </Card>
@@ -574,12 +574,12 @@ export function ItemDetailPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Package className="h-5 w-5" />
-                    Item Information
+                    {t('item.itemInfo')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    This item is currently available for viewing but does not have AR experience enabled.
+                    {t('ar.unavailableDesc')}
                   </p>
                 </CardContent>
               </Card>
@@ -591,7 +591,7 @@ export function ItemDetailPage() {
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Tags</CardTitle>
+                  <CardTitle>{t('item.tags')}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="flex flex-wrap gap-2">
@@ -611,24 +611,24 @@ export function ItemDetailPage() {
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
-                  <CardTitle>Nutritional Information</CardTitle>
+                  <CardTitle>{t('item.nutritionalInfo')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   {item.nutritional_info.calories && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Calories:</span>
+                      <span className="text-muted-foreground">{t('item.calories')}</span>
                       <span>{item.nutritional_info.calories}</span>
                     </div>
                   )}
                   {item.nutritional_info.protein && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Protein:</span>
+                      <span className="text-muted-foreground">{t('item.protein')}</span>
                       <span>{item.nutritional_info.protein}</span>
                     </div>
                   )}
                   {item.nutritional_info.allergens && item.nutritional_info.allergens.length > 0 && (
                     <div className="space-y-2">
-                      <span className="text-sm text-muted-foreground">Allergens:</span>
+                      <span className="text-sm text-muted-foreground">{t('item.allergens')}</span>
                       <div className="flex flex-wrap gap-1">
                         {item.nutritional_info.allergens.map((allergen, index) => (
                           <Badge key={index} variant="warning" className="text-xs">
@@ -650,19 +650,19 @@ export function ItemDetailPage() {
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
                     <Clock className="h-5 w-5" />
-                    Availability
+                    {t('item.availability')}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-sm text-muted-foreground">In Stock:</span>
+                    <span className="text-sm text-muted-foreground">{t('item.inStock')}</span>
                     <Badge variant={item.availability.in_stock ? "success" : "destructive"}>
-                      {item.availability.in_stock ? "Available" : "Out of Stock"}
+                      {item.availability.in_stock ? t('item.available') : t('item.outOfStock')}
                     </Badge>
                   </div>
                   {item.availability.estimated_prep_time && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Prep Time:</span>
+                      <span className="text-muted-foreground">{t('item.prepTime')}</span>
                       <span>{item.availability.estimated_prep_time}</span>
                     </div>
                   )}
@@ -675,7 +675,7 @@ export function ItemDetailPage() {
           <motion.div variants={itemVariants}>
             <Card>
               <CardHeader>
-                <CardTitle>Quick Actions</CardTitle>
+                <CardTitle>{t('item.quickActions')}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 <Button 
@@ -685,13 +685,13 @@ export function ItemDetailPage() {
                   loading={itemLoading}
                 >
                   <RefreshCw className="h-4 w-4" />
-                  Refresh Item Data
+                  {t('item.refreshItemData')}
                 </Button>
                 
                 <Button asChild variant="outline" className="w-full gap-2">
                   <Link to="/menu">
                     <Package className="h-4 w-4" />
-                    Browse More Items
+                    {t('item.browseMoreItems')}
                   </Link>
                 </Button>
               </CardContent>

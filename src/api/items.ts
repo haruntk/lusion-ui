@@ -19,7 +19,7 @@ export const itemsApi = {
    * Get all menu items
    * GET /api/items (Flask endpoint returns array directly)
    */
-  async getAll(params?: ItemSearchParams): Promise<Item[]> {
+  async getAll(params?: ItemSearchParams & { lang?: string; page?: number; limit?: number }): Promise<Item[]> {
     // Validate search parameters
     const validatedParams = params ? ItemSearchParamsSchema.parse(params) : undefined
     
@@ -32,6 +32,11 @@ export const itemsApi = {
       if (validatedParams?.search) {
         queryParams.search = validatedParams.search
       }
+      // language and pagination - prioritize passed lang over DOM
+      const langToUse = (params as any)?.lang || (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en'
+      queryParams.lang = langToUse
+      if (typeof (params as any)?.page === 'number') queryParams.page = String((params as any).page)
+      if (typeof (params as any)?.limit === 'number') queryParams.limit = String((params as any).limit)
       
       // Use the proper API endpoint
       const response = await apiClient.get('/items', {
@@ -69,14 +74,15 @@ export const itemsApi = {
    * Get single item by ID
    * GET /api/items/:id
    */
-  async getById(id: string): Promise<ItemDetail | null> {
+  async getById(id: string, lang?: 'en'|'tr'|'ar'): Promise<ItemDetail | null> {
     if (!id || typeof id !== 'string') {
       throw new Error('Item ID is required and must be a string')
     }
 
     try {
       // Use new dedicated API endpoint for items
-      const response = await apiClient.get(`/items/${id}`)
+      const langParam = lang || (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en'
+      const response = await apiClient.get(`/items/${id}`, { params: { lang: langParam } })
       if (response.data) {
         return ItemSchema.parse(response.data)
       }
@@ -91,9 +97,9 @@ export const itemsApi = {
   /**
    * Find item by ID from all items list (fallback method)
    */
-  async findById(id: string): Promise<Item | null> {
+  async findById(id: string, lang?: 'en'|'tr'|'ar'): Promise<Item | null> {
     // Client-side fallback: fetch all items and find locally
-    const items = await this.getAll()
+    const items = await this.getAll({ lang })
     const item = items.find(item => item.id === id)
     return item || null
   },

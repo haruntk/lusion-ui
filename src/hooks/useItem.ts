@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { itemsApi, ApiError, ValidationApiError } from '@/api'
 import { ItemSchema, ItemDetailSchema, type Item, type ItemDetail } from '@/types/item.schema'
+import { useLanguage } from '@/hooks/useLanguage'
 
 interface UseItemState {
   data: ItemDetail | null
@@ -27,6 +28,7 @@ export function useItem(
   itemId: string | undefined, 
   options: UseItemOptions = {}
 ): UseItemReturn {
+  const { lang } = useLanguage()
   const { 
     enabled = true, 
     staleTime = 5 * 60 * 1000, // 5 minutes default
@@ -71,11 +73,11 @@ export function useItem(
       let item: ItemDetail | Item | null = null
       
       try {
-        item = await itemsApi.getById(itemId.trim())
+        item = await itemsApi.getById(itemId.trim(), lang)
       } catch {
         // If direct fetch fails, try fallback method
         console.warn(`Direct item fetch failed for ID: ${itemId}, trying fallback`)
-        item = await itemsApi.findById(itemId.trim())
+        item = await itemsApi.findById(itemId.trim(), lang)
       }
 
       // Validate the response if we got data
@@ -143,7 +145,7 @@ export function useItem(
         }, delay)
       }
     }
-  }, [enabled, itemId, retryOnError, maxRetries, retryCount])
+  }, [enabled, itemId, retryOnError, maxRetries, retryCount, lang])
 
   const retry = useCallback(async () => {
     setRetryCount(0)
@@ -166,7 +168,7 @@ export function useItem(
     setRetryCount(0) // Reset retry count when itemId changes
     fetchItem(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemId, enabled]) // Only depend on itemId and enabled, not fetchItem function
+  }, [itemId, enabled, lang]) // refetch when language changes
 
   return {
     ...state,

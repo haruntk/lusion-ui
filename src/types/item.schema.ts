@@ -19,6 +19,19 @@ export const ItemSchema = z.object({
   vegetarian: z.boolean().optional(),
   rating: z.number().min(0).max(5, "Rating must be between 0 and 5").optional(),
   review_count: z.number().int().min(0, "Review count must be a non-negative integer").optional(),
+  // Optional localized fields fetched from backend when available
+  translations: z.object({
+    tr: z.object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      category: z.string().optional(),
+    }).optional(),
+    ar: z.object({
+      name: z.string().optional(),
+      description: z.string().optional(),
+      category: z.string().optional(),
+    }).optional(),
+  }).optional(),
 })
 
 // Item Detail Schema (same as Item but with additional metadata)

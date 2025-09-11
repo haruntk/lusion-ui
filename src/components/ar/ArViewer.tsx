@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { ArrowLeft, Sliders, RefreshCw, Bug } from 'lucide-react'
 import { Button, Card, CardContent, Badge } from '@/components/ui'
+import { useLanguage } from '@/hooks/useLanguage'
 import { ModelViewer } from './ModelViewer'
 import { getModelUrls } from '@/api/ar'
 import { type ArModelData } from '@/types/ar.schema'
@@ -23,6 +24,7 @@ export function ArViewer({
   onBack,
   showDebugInfo = false
 }: ArViewerProps) {
+  const { t } = useLanguage()
   const [modelData, setModelData] = useState<ArModelData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -122,11 +124,11 @@ export function ArViewer({
 
   if (loading) {
     return (
-      <div className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-        <div className="text-center text-white">
+      <div className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-200 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+        <div className="text-center text-foreground">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-400 mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold mb-2">Loading AR Experience...</h2>
-          <p className="text-slate-300">Preparing 3D model</p>
+          <h2 className="text-xl font-semibold mb-2">{t('ar.loadingTitle')}</h2>
+          <p className="text-muted-foreground">{t('ar.loadingSubtitle')}</p>
         </div>
       </div>
     )
@@ -134,19 +136,19 @@ export function ArViewer({
 
   if (error || !modelData) {
     return (
-      <div className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
-        <Card className="w-full max-w-md bg-slate-800/80 border-slate-700/50">
+      <div className="min-h-[400px] flex items-center justify-center bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+        <Card className="w-full max-w-md">
           <CardContent className="text-center p-6 space-y-4">
             <div className="text-destructive text-5xl mb-4">⚠️</div>
-            <h2 className="text-xl font-bold text-destructive">AR Modeli Yüklenemedi</h2>
-            <p className="text-slate-300">
-              {error || "İstenen AR modeli yüklenemiyor. Lütfen başka bir model deneyin."}
+            <h2 className="text-xl font-bold text-destructive">{t('ar.errorTitle')}</h2>
+            <p className="text-muted-foreground">
+              {error || t('ar.errorDesc')}
             </p>
             <div className="space-y-2 pt-4">
               <Button asChild className="w-full">
                 <Link to="/menu">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  Return to Menu
+                  {t('common.returnToMenu')}
                 </Link>
               </Button>
             </div>
@@ -157,7 +159,7 @@ export function ArViewer({
   }
 
   return (
-    <div className="relative min-h-[600px] bg-gradient-to-br from-slate-900 via-purple-900/20 to-slate-900">
+    <div className="relative min-h-[600px] bg-gradient-to-br from-white to-slate-100 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
 
 
       {/* AR Viewer */}
@@ -169,6 +171,7 @@ export function ArViewer({
         arModes="webxr scene-viewer quick-look"
         arScale="auto"
         autoRotate={autoRotate}
+        autoplay={true}
         cameraControls={true}
         environmentImage={environment}
         exposure={exposure}
@@ -199,21 +202,21 @@ export function ArViewer({
           boxShadow: '0 4px 8px rgba(0,0,0,0.3)'
         }}>
           <span className="mr-2">📱</span>
-          View on Table
+          {t('ar.viewOnTable')}
         </button>
         
         {/* Loading UI */}
         <div className="loading-spinner" slot="poster">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto mb-4"></div>
-          <div className="mt-3 text-white">Preparing Your Food...</div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-foreground mx-auto mb-4"></div>
+          <div className="mt-3 text-foreground">{t('ar.preparingFood')}</div>
         </div>
         
         {/* Error message for when model fails to load */}
         <div slot="error" className="error">
-          <div className="p-4 bg-destructive/90 text-white rounded-lg m-4 shadow-lg">
-            <h4 className="text-lg font-bold mb-2">⚠️ An Issue Occurred</h4>
-            <p>We couldn't load the AR view for this food item. There might be a connection issue.</p>
-            <p className="mt-2">Please try again or consult a staff member.</p>
+          <div className="p-4 bg-destructive/90 text-destructive-foreground rounded-lg m-4 shadow-lg">
+            <h4 className="text-lg font-bold mb-2">⚠️ {t('ar.issueOccurred')}</h4>
+            <p>{t('ar.issueDetail1')}</p>
+            <p className="mt-2">{t('ar.issueDetail2')}</p>
           </div>
         </div>
       </ModelViewer>
@@ -221,40 +224,40 @@ export function ArViewer({
       {/* Floating Controls */}
       <div className="absolute top-4 left-4 z-10">
         {onBack ? (
-          <Button onClick={onBack} variant="ghost" className="text-white hover:bg-white/10">
+          <Button onClick={onBack} variant="ghost" className="hover:bg-foreground/10">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Go Back
+            {t('common.goBack')}
           </Button>
         ) : (
-          <Button asChild variant="ghost" className="text-white hover:bg-white/10">
+          <Button asChild variant="ghost" className="hover:bg-foreground/10">
             <Link to="/menu">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Return to Menu
+              {t('common.returnToMenu')}
             </Link>
           </Button>
         )}
       </div>
       
       {/* Item Info Panel */}
-      <div className="absolute bottom-0 left-0 right-0 p-3 bg-black/60 backdrop-blur-sm">
+      <div className="absolute bottom-0 left-0 right-0 p-3 bg-white/90 text-foreground backdrop-blur-sm dark:bg-black/70">
         <div className="container mx-auto">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex gap-2">
               <Button 
                 variant="ghost" 
-                className="text-white hover:bg-white/10 border border-white/20"
+                className="hover:bg-foreground/10 border border-border text-foreground"
                 onClick={() => setShowControls(!showControls)}
               >
                 <Sliders className="h-4 w-4 mr-2" />
-                Settings
+                {t('common.settings')}
               </Button>
               <Button 
                 variant="ghost" 
-                className="text-white hover:bg-white/10 border border-white/20"
+                className="hover:bg-foreground/10 border border-border text-foreground"
                 onClick={resetView}
               >
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Reset
+                {t('common.reset')}
               </Button>
             </div>
           </div>
@@ -267,14 +270,14 @@ export function ArViewer({
           initial={{ opacity: 0, x: 100 }}
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 100 }}
-          className="absolute top-1/2 right-4 -translate-y-1/2 bg-black/80 p-4 rounded-lg shadow-lg z-20 backdrop-blur-sm"
+          className="absolute top-1/2 right-4 -translate-y-1/2 bg-white/90 text-foreground dark:bg-black/80 p-4 rounded-lg shadow-lg z-20 backdrop-blur-sm"
           style={{ maxWidth: '300px' }}
         >
-          <h5 className="text-white font-bold border-b border-white/20 pb-2 mb-4">View Settings</h5>
+          <h5 className="font-bold border-b border-border pb-2 mb-4">View Settings</h5>
           
           {/* Scale Control */}
           <div className="mb-4">
-            <div className="flex justify-between text-sm text-white mb-1">
+            <div className="flex justify-between text-sm mb-1">
               <span>Size</span>
               <span>{scale.toFixed(1)}x</span>
             </div>
@@ -291,7 +294,7 @@ export function ArViewer({
           
           {/* Rotation Control */}
           <div className="mb-4">
-            <div className="flex justify-between text-sm text-white mb-1">
+            <div className="flex justify-between text-sm mb-1">
               <span>Rotation</span>
               <span>{rotation}°</span>
             </div>
@@ -308,7 +311,7 @@ export function ArViewer({
           
           {/* Auto-Rotate Toggle */}
           <div className="mb-4 flex items-center justify-between">
-            <span className="text-sm text-white">Auto Rotate</span>
+            <span className="text-sm">Auto Rotate</span>
             <div className="relative inline-block w-10 align-middle select-none">
               <input 
                 type="checkbox" 
@@ -319,14 +322,10 @@ export function ArViewer({
               />
               <label 
                 htmlFor="auto-rotate-toggle"
-                className={`block overflow-hidden h-6 rounded-full cursor-pointer ${
-                  autoRotate ? 'bg-primary' : 'bg-gray-600'
-                }`}
+                className={`block overflow-hidden h-6 rounded-full cursor-pointer ${autoRotate ? 'bg-primary' : 'bg-gray-300 dark:bg-gray-600'}`}
               >
                 <span 
-                  className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${
-                    autoRotate ? 'translate-x-4' : 'translate-x-0'
-                  }`} 
+                  className={`block h-6 w-6 rounded-full bg-white transform transition-transform ${autoRotate ? 'translate-x-4' : 'translate-x-0'}`} 
                 />
               </label>
             </div>
@@ -334,7 +333,7 @@ export function ArViewer({
           
           {/* Lighting Control */}
           <div className="mb-4">
-            <div className="flex justify-between text-sm text-white mb-1">
+            <div className="flex justify-between text-sm mb-1">
               <span>Brightness</span>
               <span>{exposure.toFixed(1)}</span>
             </div>
@@ -351,14 +350,14 @@ export function ArViewer({
           
           {/* Environment Dropdown */}
           <div className="mb-4">
-            <label htmlFor="environment-select" className="block text-sm text-white mb-1">
+            <label htmlFor="environment-select" className="block text-sm mb-1">
               Lighting Style
             </label>
             <select 
               id="environment-select"
               value={environment}
               onChange={(e) => setEnvironment(e.target.value)}
-              className="w-full bg-gray-800 text-white border border-gray-700 rounded py-1 px-2 text-sm"
+              className="w-full bg-white text-foreground border border-border rounded py-1 px-2 text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700"
             >
               <option value="neutral">Default</option>
               <option value="restaurant">Warm</option>
@@ -369,7 +368,7 @@ export function ArViewer({
           
           {/* Shadow Intensity Control */}
           <div className="mb-4">
-            <div className="flex justify-between text-sm text-white mb-1">
+            <div className="flex justify-between text-sm mb-1">
               <span>Shadow Intensity</span>
               <span>{shadowIntensity.toFixed(1)}</span>
             </div>
@@ -386,7 +385,7 @@ export function ArViewer({
           
           {/* Shadow Softness Control */}
           <div className="mb-2">
-            <div className="flex justify-between text-sm text-white mb-1">
+            <div className="flex justify-between text-sm mb-1">
               <span>Shadow Softness</span>
               <span>{shadowSoftness.toFixed(1)}</span>
             </div>

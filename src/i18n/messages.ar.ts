@@ -89,6 +89,16 @@ export const ar = {
     arLaunches: 'تشغيلات الواقع المعزز',
     conversionRate: 'معدل التحويل',
   },
+  nutrition: {
+    title: 'القيم الغذائية',
+    calories: 'السعرات الحرارية',
+    protein: 'البروتين',
+    carbs: 'الكربوهيدرات',
+    fat: 'الدهون',
+    kcal: 'سعرة حرارية',
+    grams: 'غ',
+    notAvailable: 'المعلومات الغذائية غير متوفرة',
+  },
   menu: {
     loadingTitle: 'جارٍ تحميل القائمة',
     loadingSubtitle: '...جاري جلب الأطباق اللذيذة لك',

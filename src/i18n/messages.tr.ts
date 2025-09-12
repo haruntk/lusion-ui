@@ -89,6 +89,16 @@ export const tr = {
     arLaunches: 'AR başlatma',
     conversionRate: 'Dönüşüm oranı',
   },
+  nutrition: {
+    title: 'Besin Değerleri',
+    calories: 'Kalori',
+    protein: 'Protein',
+    carbs: 'Karbonhidrat',
+    fat: 'Yağ',
+    kcal: 'kcal',
+    grams: 'g',
+    notAvailable: 'Besin bilgisi mevcut değil',
+  },
   menu: {
     loadingTitle: 'Menü Yükleniyor',
     loadingSubtitle: 'Sizin için lezzetli ürünler getiriliyor...',

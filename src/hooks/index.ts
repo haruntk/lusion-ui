@@ -6,6 +6,7 @@ export { useQr } from './useQr'
 export { useToast, ToastContext } from './useToast'
 export { useTheme } from './useTheme'
 export { useLanguage } from './useLanguage'
+export { useNutrition } from './useNutrition'
 
 // Hook types for external usage (commented out until interfaces are properly exported)
 // export type { UseItemsReturn, UseItemsOptions } from './useItems'

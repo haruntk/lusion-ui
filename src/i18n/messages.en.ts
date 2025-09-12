@@ -89,6 +89,16 @@ export const en = {
     arLaunches: 'AR launches',
     conversionRate: 'Conversion rate',
   },
+  nutrition: {
+    title: 'Nutrition Facts',
+    calories: 'Calories',
+    protein: 'Protein',
+    carbs: 'Carbohydrates',
+    fat: 'Fat',
+    kcal: 'kcal',
+    grams: 'g',
+    notAvailable: 'Nutrition information not available',
+  },
   menu: {
     loadingTitle: 'Loading Menu',
     loadingSubtitle: 'Fetching delicious items for you...',

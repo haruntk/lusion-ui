@@ -26,7 +26,7 @@ import {
   useToast
 } from "@/components/ui"
 import { ErrorState } from "@/components/common"
-import { useItem, useQr, useArSession, useLanguage } from "@/hooks"
+import { useItem, useQr, useArSession, useLanguage, useNutrition } from "@/hooks"
 import { localizeItemFields } from '@/utils/i18n'
 
 const pageVariants = {
@@ -113,6 +113,15 @@ export function ItemDetailPage() {
     startAr
   } = useArSession({
     itemId: id,
+    enabled: !!id
+  })
+
+  const {
+    data: nutritionData,
+    loading: nutritionLoading,
+    error: nutritionError,
+    refetch: refetchNutrition
+  } = useNutrition(id, {
     enabled: !!id
   })
 
@@ -606,42 +615,55 @@ export function ItemDetailPage() {
             </motion.div>
           )}
 
-          {/* Nutritional Info */}
-          {item.nutritional_info && (
-            <motion.div variants={itemVariants}>
-              <Card>
-                <CardHeader>
-                  <CardTitle>{t('item.nutritionalInfo')}</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-2">
-                  {item.nutritional_info.calories && (
+          {/* Nutrition Facts */}
+          <motion.div variants={itemVariants}>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
+                  {t('nutrition.title')}
+                  {nutritionLoading && <Spinner size="sm" />}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {nutritionError ? (
+                  <div className="text-center py-4">
+                    <p className="text-sm text-destructive mb-2">{nutritionError}</p>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={refetchNutrition}
+                      leftIcon={<RefreshCw className="h-4 w-4" />}
+                    >
+                      {t('common.retry')}
+                    </Button>
+                  </div>
+                ) : nutritionData ? (
+                  <div className="space-y-3">
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t('item.calories')}</span>
-                      <span>{item.nutritional_info.calories}</span>
+                      <span className="text-muted-foreground">{t('nutrition.calories')}</span>
+                      <span className="font-medium">{nutritionData.calories} {t('nutrition.kcal')}</span>
                     </div>
-                  )}
-                  {item.nutritional_info.protein && (
                     <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t('item.protein')}</span>
-                      <span>{item.nutritional_info.protein}</span>
+                      <span className="text-muted-foreground">{t('nutrition.protein')}</span>
+                      <span className="font-medium">{nutritionData.protein} {t('nutrition.grams')}</span>
                     </div>
-                  )}
-                  {item.nutritional_info.allergens && item.nutritional_info.allergens.length > 0 && (
-                    <div className="space-y-2">
-                      <span className="text-sm text-muted-foreground">{t('item.allergens')}</span>
-                      <div className="flex flex-wrap gap-1">
-                        {item.nutritional_info.allergens.map((allergen, index) => (
-                          <Badge key={index} variant="warning" className="text-xs">
-                            {allergen}
-                          </Badge>
-                        ))}
-                      </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t('nutrition.carbs')}</span>
+                      <span className="font-medium">{nutritionData.carbs} {t('nutrition.grams')}</span>
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
-          )}
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">{t('nutrition.fat')}</span>
+                      <span className="font-medium">{nutritionData.fat} {t('nutrition.grams')}</span>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    {t('nutrition.notAvailable')}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
 
           {/* Availability Info */}
           {item.availability && (

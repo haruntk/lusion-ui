@@ -68,6 +68,7 @@ export const ar = {
     deviceDesktop: 'متصفح سطح المكتب',
     arReadyBadge: 'جاهز لتجربة الواقع المعزز',
     viewOnMobile: 'اعرض هذا العنصر في الواقع المعزز على جهازك المحمول',
+    viewInTable: 'اعرض هذا العنصر على طاولتك!',
     optimizedForMobile: 'محسن لجهازك المحمول',
     bestOnMobile: 'أفضل تجربة على الأجهزة المحمولة الداعمة للواقع المعزز',
     itemInfo: 'معلومات العنصر',

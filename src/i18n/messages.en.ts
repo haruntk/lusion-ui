@@ -69,6 +69,7 @@ export const en = {
     deviceDesktop: 'Desktop Browser',
     arReadyBadge: 'AR Experience Ready',
     viewOnMobile: 'View this item in augmented reality on your mobile device',
+    viewInTable: 'View this item in your table!',
     optimizedForMobile: 'Optimized for your mobile device',
     bestOnMobile: 'Best experienced on mobile devices with AR support',
     itemInfo: 'Item Information',

@@ -69,6 +69,7 @@ export const tr = {
     deviceDesktop: 'Masaüstü Tarayıcı',
     arReadyBadge: 'AR Deneyimine Hazır',
     viewOnMobile: 'Bu öğeyi mobil cihazınızda artırılmış gerçeklikte görüntüleyin',
+    viewInTable: 'Bu ürünü masanızda görüntüleyin!',
     optimizedForMobile: 'Mobil cihazınız için optimize edildi',
     bestOnMobile: 'En iyi AR destekli mobil cihazlarda deneyimlenir',
     itemInfo: 'Ürün Bilgisi',

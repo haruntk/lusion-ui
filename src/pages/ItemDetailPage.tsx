@@ -511,54 +511,28 @@ export function ItemDetailPage() {
                       <Sparkles className="h-5 w-5" />
                       {t('common.arExperience')}
                     </div>
-                    {arLoading && <Spinner size="sm" />}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Device Info */}
-                  {deviceInfo && (
-                    <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <Smartphone className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">
-                          {deviceInfo.platform === 'ios' ? t('item.deviceIos') : 
-                           deviceInfo.platform === 'android' ? t('item.deviceAndroid') : 
-                           t('item.deviceDesktop')}
-                        </span>
-                      </div>
-                      <Badge variant="success">
-                        {t('item.arReadyBadge')}
-                      </Badge>
-                    </div>
-                  )}
-
-                  <p className="text-sm text-muted-foreground">
-                    {t('item.viewOnMobile')}
+                  <p className="text-center text-muted-foreground">
+                    {t('item.viewInTable')}
                   </p>
                   
-                  <div className="flex flex-col gap-3">
-                    <Button 
-                      className="gap-2 w-full relative overflow-hidden text-base font-semibold shadow-sm"
-                      onClick={startAr}
-                      size="lg"
-                    >
-                      <span className="absolute inset-0 -z-10 bg-gradient-to-r from-primary to-purple-600 opacity-20" />
-                      <Smartphone className="h-5 w-5" />
-                      {t('ar.ctaStart')}
-                    </Button>
-                  </div>
+                  <Button 
+                    className="w-full gap-2 text-base font-semibold border-2 border-primary shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-primary to-purple-600 hover:from-primary/90 hover:to-purple-600/90"
+                    onClick={startAr}
+                    size="lg"
+                    variant="default"
+                  >
+                    <Sparkles className="h-5 w-5" />
+                    {t('ar.ctaStart')}
+                  </Button>
                   
                   {arError && (
                     <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
                       <p className="text-sm text-destructive">{arError}</p>
                     </div>
                   )}
-
-                  <p className="text-xs text-muted-foreground">
-                    {deviceInfo?.isMobile 
-                      ? t('item.optimizedForMobile') 
-                      : t('item.bestOnMobile')}
-                  </p>
                 </CardContent>
               </Card>
             </motion.div>

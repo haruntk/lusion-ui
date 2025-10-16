@@ -43,7 +43,7 @@ export function Navbar() {
               <img 
                 src="/logos/clean_flat_logo.png" 
                 alt="Lusion Logo" 
-                className="h-8 w-auto object-contain"
+                className="h-6 w-auto object-contain"
               />
             </Link>
           </motion.div>

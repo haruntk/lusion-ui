@@ -74,7 +74,7 @@ export function AboutPage() {
             <img 
               src="/logos/clean_text.png" 
               alt="Lusion Logo" 
-              className="h-20 md:h-24 w-auto object-contain"
+              className="h-14 md:h-16 w-auto object-contain"
             />
           </div>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">

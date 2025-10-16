@@ -251,36 +251,42 @@ export function QrCodesPage() {
               whileHover={{ scale: 1.02, y: -2 }}
             >
               <Card className="h-full hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="text-center">
-                  <div className="mx-auto mb-4 p-4 bg-muted rounded-lg">
-                    <img
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent(`${window.location.origin}/ar-view?item_id=${item.id}`)}`}
-                      alt={`QR Code for ${item.name}`}
-                      className="w-32 h-32 mx-auto"
-                      loading="lazy"
-                      onError={(e) => {
-                        // Fallback to placeholder if QR service fails
-                        const target = e.target as HTMLImageElement;
-                        target.src = `https://via.placeholder.com/128x128/f3f4f6/6b7280?text=QR`;
-                      }}
-                    />
-                  </div>
-                  <CardTitle className="text-lg">{item.name}</CardTitle>
-                  <Badge variant="outline" className="text-xs">
-                    {item.category}
-                  </Badge>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <p className="text-sm text-muted-foreground text-center line-clamp-2">
-                    {item.description}
-                  </p>
-                  
+                <Link to={`/menu/${item.id}`} className="block">
+                  <CardHeader className="text-center cursor-pointer">
+                    <div className="mx-auto mb-4 p-4 bg-muted rounded-lg">
+                      <img
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent(`${window.location.origin}/ar-view?item_id=${item.id}`)}`}
+                        alt={`QR Code for ${item.name}`}
+                        className="w-32 h-32 mx-auto"
+                        loading="lazy"
+                        onError={(e) => {
+                          // Fallback to placeholder if QR service fails
+                          const target = e.target as HTMLImageElement;
+                          target.src = `https://via.placeholder.com/128x128/f3f4f6/6b7280?text=QR`;
+                        }}
+                      />
+                    </div>
+                    <CardTitle className="text-lg">{item.name}</CardTitle>
+                    <Badge variant="outline" className="text-xs">
+                      {item.category}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-muted-foreground text-center line-clamp-2">
+                      {item.description}
+                    </p>
+                  </CardContent>
+                </Link>
+                <CardContent className="space-y-3 pt-0">
                   <div className="flex gap-2">
                     <Button
                       size="sm"
                       variant="outline"
                       className="flex-1 gap-1"
-                      onClick={() => handleDownloadQr(item.id, item.name)}
+                      onClick={(e) => {
+                        e.preventDefault()
+                        handleDownloadQr(item.id, item.name)
+                      }}
                     >
                       <Download className="h-3 w-3" />
                       {t('common.download')}
@@ -289,7 +295,8 @@ export function QrCodesPage() {
                       size="sm"
                       variant="outline"
                       className="flex-1 gap-1"
-                      onClick={async () => {
+                      onClick={async (e) => {
+                        e.preventDefault()
                         const arUrl = `${window.location.origin}/ar-view?item_id=${item.id}`
                         try {
                           if (navigator.share) {
@@ -312,13 +319,6 @@ export function QrCodesPage() {
                       {t('common.share')}
                     </Button>
                   </div>
-                  
-                  <Button asChild size="sm" className="w-full gap-2">
-                    <Link to={`/menu/${item.id}`}>
-                      <QrCode className="h-3 w-3" />
-                      {t('common.viewItem')}
-                    </Link>
-                  </Button>
                 </CardContent>
               </Card>
             </motion.div>

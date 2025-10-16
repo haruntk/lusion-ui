@@ -1,6 +1,7 @@
 // Main Pages
 export { SimpleWelcomePage } from './SimpleWelcomePage'
 export { MenuPage } from './MenuPage'
+export { RealEstatePage } from './RealEstatePage'
 export { AboutPage } from './AboutPage'
 export { ContactPage } from './ContactPage'
 export { QrCodesPage } from './QrCodesPage'

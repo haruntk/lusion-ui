@@ -2,6 +2,7 @@ export const en = {
   common: {
     home: 'Home',
     menu: 'Menu',
+    realEstate: 'Real Estate',
     qrCodes: 'QR Codes',
     about: 'About',
     arExperience: 'AR Experience',

@@ -7,6 +7,7 @@ import { Spinner } from "@/components/ui"
 const WelcomePage = React.lazy(() => import("@/pages/SimpleWelcomePage").then(m => ({ default: m.SimpleWelcomePage })))
 // Lazy load other pages for better performance
 const MenuPage = React.lazy(() => import("@/pages/MenuPage").then(m => ({ default: m.MenuPage })))
+const RealEstatePage = React.lazy(() => import("@/pages/RealEstatePage").then(m => ({ default: m.RealEstatePage })))
 const AboutPage = React.lazy(() => import("@/pages/AboutPage").then(m => ({ default: m.AboutPage })))
 const ContactPage = React.lazy(() => import("@/pages/ContactPage").then(m => ({ default: m.ContactPage })))
 const QrCodesPage = React.lazy(() => import("@/pages/QrCodesPage").then(m => ({ default: m.QrCodesPage })))
@@ -51,6 +52,7 @@ export function AppRoutes() {
         <Route path="/" element={<Layout key="layout" />}>
           <Route index element={<WelcomePage />} />
           <Route path="menu" element={<MenuPage />} />
+          <Route path="real-estate" element={<RealEstatePage />} />
           <Route path="menu/:id" element={<ItemDetailPage />} />
           <Route path="view/:id" element={<ModelViewerPage />} />
           <Route path="about" element={<AboutPage />} />

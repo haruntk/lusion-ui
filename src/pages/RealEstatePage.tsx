@@ -1,21 +1,21 @@
 import * as React from "react"
 import { Link, useLocation } from "react-router-dom"
 import { motion } from "framer-motion"
-import { 
-  Search, 
-  Filter, 
-  Grid3X3, 
+import {
+  Search,
+  Filter,
+  Grid3X3,
   List,
   ArrowRight,
   Sparkles,
   RefreshCw,
   Package
 } from "lucide-react"
-import { 
-  Button, 
-  Card, 
-  CardContent, 
-  CardHeader, 
+import {
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
   Input,
   Badge,
   Spinner
@@ -26,14 +26,14 @@ import { useLanguage } from '@/hooks/useLanguage'
 
 const pageVariants = {
   initial: { opacity: 0 },
-  animate: { 
+  animate: {
     opacity: 1,
     transition: {
       duration: 0.4,
       staggerChildren: 0.1
     }
   },
-  exit: { 
+  exit: {
     opacity: 0,
     transition: { duration: 0.2 }
   }
@@ -41,7 +41,7 @@ const pageVariants = {
 
 const itemVariants = {
   initial: { opacity: 0 },
-  animate: { 
+  animate: {
     opacity: 1,
     transition: {
       type: "spring" as const,
@@ -51,52 +51,51 @@ const itemVariants = {
   }
 }
 
-export function MenuPage() {
+export function RealEstatePage() {
   const location = useLocation()
   const { lang, t } = useLanguage()
   const [searchQuery, setSearchQuery] = React.useState("")
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null)
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid')
 
-  // Set document title for accessibility
+  // Sayfa başlığı
   React.useEffect(() => {
-    document.title = t('menu.headerTitle') + ' - Lusion AR Dining'
+    document.title = t('common.realEstate') + ' - Lusion AR Dining'
   }, [])
 
-  // Memoize options to prevent infinite re-renders
+  // Sadece "Real Estate" kategorisini getir
   const itemsOptions = React.useMemo(() => ({
     enabled: true,
-    refetchInterval: undefined, // No auto-refresh
-    params: { search: searchQuery || undefined, category: selectedCategory || undefined }
-  }), [lang, searchQuery, selectedCategory])
+    refetchInterval: undefined,
+    params: { search: searchQuery || undefined, category: 'Real Estate' }
+  }), [lang, searchQuery])
 
-  const { 
-    data: items, 
-    categories, 
-    loading, 
-    error, 
+  const {
+    data: items,
+    categories,
+    loading,
+    error,
     refetch,
     isEmpty,
     searchItems,
     getItemsByCategory
   } = useItems(itemsOptions)
 
-  // Defensive revalidation when arriving to /menu from other routes
+  // /real-estate rotasına gelince tazele
   React.useEffect(() => {
-    if (location.pathname === '/menu') {
-      // Refetch to ensure fresh data after navigating back from details or language change
+    if (location.pathname === '/real-estate') {
       refetch()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname, lang])
 
-  // Refetch when language changes to avoid showing stale cached data
+  // Dil değişince tekrar yükle
   React.useEffect(() => {
     refetch()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang])
 
-  // Auto recover if empty without error after a brief moment (race protection)
+  // Boşsa kısa gecikmeyle toparlanmayı dene
   React.useEffect(() => {
     if (!loading && !error && items.length === 0) {
       const t = setTimeout(() => {
@@ -106,7 +105,7 @@ export function MenuPage() {
     }
   }, [items.length, loading, error, refetch, lang])
 
-  // Filter items based on search and category
+  // Arama ve (tek) kategoriye göre filtrele
   const filteredItems = React.useMemo(() => {
     let result = items
 
@@ -121,7 +120,6 @@ export function MenuPage() {
     return result
   }, [items, searchQuery, selectedCategory, searchItems, getItemsByCategory])
 
-  // Handle loading state (avoid full-page blank by keeping skeleton ready)
   if (loading && items.length === 0) {
     return (
       <motion.div
@@ -139,7 +137,6 @@ export function MenuPage() {
     )
   }
 
-  // Handle error state
   if (error) {
     return (
       <motion.div
@@ -157,7 +154,6 @@ export function MenuPage() {
     )
   }
 
-  // Handle empty state
   if (isEmpty) {
     return (
       <motion.div
@@ -191,7 +187,7 @@ export function MenuPage() {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              {t('menu.headerTitle')}
+              {t('common.realEstate')}
             </h1>
             <p className="text-muted-foreground text-lg">
               {t('menu.headerSubtitle')}
@@ -203,7 +199,7 @@ export function MenuPage() {
               size="sm"
               onClick={refetch}
               disabled={loading}
-              aria-label="Refresh menu items"
+              aria-label="Refresh real estate items"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
@@ -239,7 +235,7 @@ export function MenuPage() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
-              aria-label="Search menu items"
+              aria-label="Search real estate items"
             />
           </div>
           <Button
@@ -256,7 +252,7 @@ export function MenuPage() {
           </Button>
         </div>
 
-        {/* Category Filter */}
+        {/* Category Filter (will effectively show only Real Estate) */}
         <div className="flex flex-wrap gap-2">
           <Button
             variant={selectedCategory === null ? "default" : "outline"}
@@ -285,7 +281,7 @@ export function MenuPage() {
       <motion.div variants={itemVariants} className="mb-6">
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground">
-            {filteredItems.length === items.length 
+            {filteredItems.length === items.length
               ? t('menu.resultsSummaryAll', { count: items.length })
               : t('menu.resultsSummarySome', { shown: filteredItems.length, total: items.length })}
             {searchQuery && ` "${searchQuery}"`}
@@ -297,7 +293,7 @@ export function MenuPage() {
         </div>
       </motion.div>
 
-      {/* Menu Items */}
+      {/* Items */}
       {filteredItems.length === 0 ? (
         <motion.div variants={itemVariants}>
           {searchQuery || selectedCategory ? (
@@ -324,10 +320,10 @@ export function MenuPage() {
           )}
         </motion.div>
       ) : (
-        <motion.div 
+        <motion.div
           variants={itemVariants}
           className={
-            viewMode === 'grid' 
+            viewMode === 'grid'
               ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
               : "space-y-4"
           }
@@ -338,50 +334,70 @@ export function MenuPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05, duration: 0.3 }}
-              whileHover={{ 
-                scale: 1.02, 
+              whileHover={{
+                scale: 1.02,
                 y: -2,
                 transition: { type: "spring", stiffness: 300, damping: 20 }
               }}
             >
-              <Link to={`/menu/${item.id}`} className="block h-full">
-                <Card className="h-full hover:shadow-lg transition-shadow duration-300 group cursor-pointer">
-                  <CardHeader className="p-0">
-                    <div className={`${viewMode === 'grid' ? 'aspect-video' : 'aspect-[4/3] md:aspect-video'} bg-muted rounded-t-lg overflow-hidden`}>
-                      {item.image && item.image !== "" ? (
-                        <img
-                          src={item.image}
-                          alt={`${item.name} - ${item.description}`}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
+              <Card className="h-full hover:shadow-lg transition-shadow duration-300 group">
+                <CardHeader className="p-0">
+                  <div className={`${viewMode === 'grid' ? 'aspect-video' : 'aspect-[4/3] md:aspect-video'} bg-muted rounded-t-lg overflow-hidden`}>
+                    {item.image && item.image !== "" ? (
+                      <img
+                        src={item.image}
+                        alt={`${item.name} - ${item.description}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
+                        <Package className="h-12 w-12 text-muted-foreground/30" />
+                      </div>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-lg leading-tight">
+                      {item.name}
+                    </h3>
+                    <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
+                      {item.category}
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
+                    {item.description}
+                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xl font-bold text-primary">
+                      {item.price}
+                    </span>
+                    <div className="flex gap-2">
+                      {item.has_ar_model ? (
+                        <Button asChild size="sm" variant="outline">
+                          <Link
+                            to={`/menu/${item.id}`}
+                            aria-label={`View ${item.name} details and AR experience`}
+                          >
+                            <Sparkles className="h-4 w-4 mr-1" />
+                            {t('common.viewAr')}
+                          </Link>
+                        </Button>
                       ) : (
-                        <div className="w-full h-full bg-gradient-to-br from-muted to-muted/50 flex items-center justify-center">
-                          <Package className="h-12 w-12 text-muted-foreground/30" />
-                        </div>
+                        <Button asChild size="sm" variant="outline">
+                          <Link
+                            to={`/menu/${item.id}`}
+                            aria-label={`View ${item.name} details`}
+                          >
+                            {t('common.details')}
+                          </Link>
+                        </Button>
                       )}
                     </div>
-                  </CardHeader>
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      <h3 className="font-semibold text-lg leading-tight">
-                        {item.name}
-                      </h3>
-                      <Badge variant="outline" className="text-xs ml-2 flex-shrink-0">
-                        {item.category}
-                      </Badge>
-                    </div>
-                    <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-                      {item.description}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xl font-bold text-primary">
-                        {item.price}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
+                  </div>
+                </CardContent>
+              </Card>
             </motion.div>
           ))}
         </motion.div>
@@ -406,3 +422,5 @@ export function MenuPage() {
     </motion.div>
   )
 }
+
+

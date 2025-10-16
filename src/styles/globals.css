@@ -118,4 +118,16 @@
   .text-balance {
     text-wrap: balance;
   }
+  
+  /* Ensure all interactive elements show pointer cursor */
+  .cursor-pointer,
+  a[href],
+  button,
+  [role="button"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  summary {
+    cursor: pointer;
+  }
 }

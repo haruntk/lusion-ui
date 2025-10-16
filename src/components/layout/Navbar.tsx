@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Link, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Home, Package, QrCode, Info, Sparkles } from "lucide-react"
+import { Menu, X, Home, Package, QrCode, Info, Sparkles, Building2 } from "lucide-react"
 import { Button, ThemeToggle } from "@/components/ui"
 import { cn } from "@/utils"
 import { LanguageMenu } from '@/components/ui/LanguageMenu'
@@ -10,6 +10,7 @@ import { useLanguage } from '@/hooks/useLanguage'
 const baseNavItems = [
   { key: 'common.home', href: '/', icon: <Home className="h-4 w-4" /> },
   { key: 'common.menu', href: '/menu', icon: <Package className="h-4 w-4" /> },
+  { key: 'common.realEstate', href: '/real-estate', icon: <Building2 className="h-4 w-4" /> },
   { key: 'common.arExperience', href: '/ar-view', icon: <Sparkles className="h-4 w-4" /> },
   { key: 'common.qrCodes', href: '/qr', icon: <QrCode className="h-4 w-4" /> },
   { key: 'common.about', href: '/about', icon: <Info className="h-4 w-4" /> },
@@ -38,10 +39,12 @@ export function Navbar() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
-            <Link to="/" className="flex items-center space-x-3">
-              <div className="h-10 w-20 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-md">
-                <span className="text-primary-foreground font-bold text-sm">Lusion</span>
-              </div>
+            <Link to="/" className="flex items-center cursor-pointer">
+              <img 
+                src="/logos/clean_flat_logo.png" 
+                alt="Lusion Logo" 
+                className="h-8 w-auto object-contain"
+              />
             </Link>
           </motion.div>
 
@@ -59,7 +62,7 @@ export function Navbar() {
                     <Link
                       to={item.href}
                       className={cn(
-                        "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative",
+                        "flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 relative cursor-pointer",
                         isActive
                           ? "text-primary bg-primary/10"
                           : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
@@ -149,7 +152,7 @@ export function Navbar() {
                       <Link
                         to={item.href}
                         className={cn(
-                          "flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200",
+                          "flex items-center space-x-3 px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 cursor-pointer",
                           isActive
                             ? "text-primary bg-primary/10 border border-primary/20"
                             : "text-muted-foreground hover:text-foreground hover:bg-accent/50"

@@ -501,25 +501,10 @@ export function ItemDetailPage() {
 
         {/* Item Details */}
         <div className="space-y-6">
-          <motion.div variants={itemVariants}>
-            <div>
-              <h1 className="text-3xl font-bold mb-4">{localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').name}</h1>
-              <div className="flex items-center gap-4 mb-4">
-                <span className="text-3xl font-bold text-primary">{item.price}</span>
-                <Badge variant="outline" className="capitalize text-sm px-3 py-1">
-                  {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').category}
-                </Badge>
-              </div>
-              <p className="text-muted-foreground leading-relaxed text-lg">
-                {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').description}
-              </p>
-            </div>
-          </motion.div>
-
-          {/* AR Experience Card - Only show if item has AR model */}
+          {/* AR Experience Card - Only show if item has AR model - MOVED TO TOP */}
           {item.has_ar_model ? (
             <motion.div variants={itemVariants}>
-              <Card>
+              <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -553,10 +538,11 @@ export function ItemDetailPage() {
                   
                   <div className="flex flex-col gap-3">
                     <Button 
-                      className="gap-2 w-full" 
+                      className="gap-2 w-full relative overflow-hidden text-base font-semibold shadow-sm"
                       onClick={startAr}
                       size="lg"
                     >
+                      <span className="absolute inset-0 -z-10 bg-gradient-to-r from-primary to-purple-600 opacity-20" />
                       <Smartphone className="h-5 w-5" />
                       {t('ar.ctaStart')}
                     </Button>
@@ -576,8 +562,25 @@ export function ItemDetailPage() {
                 </CardContent>
               </Card>
             </motion.div>
-          ) : (
-            /* Alternative content when AR is not available */
+          ) : null}
+
+          <motion.div variants={itemVariants}>
+            <div className="text-center">
+              <h1 className="text-3xl font-bold mb-2">{localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').name}</h1>
+              <div className="flex items-center justify-center gap-3 mb-4">
+                <span className="text-3xl font-bold text-primary">{item.price}</span>
+                <Badge variant="outline" className="capitalize text-sm px-3 py-1">
+                  {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').category}
+                </Badge>
+              </div>
+              <p className="text-muted-foreground leading-relaxed text-lg">
+                {localizeItemFields(item, (document.documentElement.getAttribute('lang') as 'en'|'tr'|'ar') || 'en').description}
+              </p>
+            </div>
+          </motion.div>
+
+          {/* Alternative content when AR is not available */}
+          {!item.has_ar_model && (
             <motion.div variants={itemVariants}>
               <Card>
                 <CardHeader>
@@ -618,13 +621,13 @@ export function ItemDetailPage() {
           {/* Nutrition Facts */}
           <motion.div variants={itemVariants}>
             <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  {t('nutrition.title')}
-                  {nutritionLoading && <Spinner size="sm" />}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
+                <CardHeader className="py-4">
+                  <CardTitle className="flex items-center justify-center text-center gap-2">
+                    <span className="text-base font-semibold">{t('nutrition.title')}</span>
+                    {nutritionLoading && <Spinner size="sm" />}
+                  </CardTitle>
+                </CardHeader>
+              <CardContent className="pt-0">
                 {nutritionError ? (
                   <div className="text-center py-4">
                     <p className="text-sm text-destructive mb-2">{nutritionError}</p>
@@ -638,22 +641,34 @@ export function ItemDetailPage() {
                     </Button>
                   </div>
                 ) : nutritionData ? (
-                  <div className="space-y-3">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t('nutrition.calories')}</span>
-                      <span className="font-medium">{nutritionData.calories} {t('nutrition.kcal')}</span>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-lg bg-accent/10 p-3 text-center">
+                      <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('nutrition.calories')}</div>
+                      <div className="mt-1 text-xl font-bold tabular-nums">
+                        {nutritionData.calories}
+                        <span className="ml-1 text-xs font-medium text-muted-foreground">{t('nutrition.kcal')}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t('nutrition.protein')}</span>
-                      <span className="font-medium">{nutritionData.protein} {t('nutrition.grams')}</span>
+                    <div className="rounded-lg bg-accent/10 p-3 text-center">
+                      <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('nutrition.protein')}</div>
+                      <div className="mt-1 text-xl font-bold tabular-nums">
+                        {nutritionData.protein}
+                        <span className="ml-1 text-xs font-medium text-muted-foreground">{t('nutrition.grams')}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t('nutrition.carbs')}</span>
-                      <span className="font-medium">{nutritionData.carbs} {t('nutrition.grams')}</span>
+                    <div className="rounded-lg bg-accent/10 p-3 text-center">
+                      <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('nutrition.carbs')}</div>
+                      <div className="mt-1 text-xl font-bold tabular-nums">
+                        {nutritionData.carbs}
+                        <span className="ml-1 text-xs font-medium text-muted-foreground">{t('nutrition.grams')}</span>
+                      </div>
                     </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">{t('nutrition.fat')}</span>
-                      <span className="font-medium">{nutritionData.fat} {t('nutrition.grams')}</span>
+                    <div className="rounded-lg bg-accent/10 p-3 text-center">
+                      <div className="text-xs uppercase tracking-wider text-muted-foreground">{t('nutrition.fat')}</div>
+                      <div className="mt-1 text-xl font-bold tabular-nums">
+                        {nutritionData.fat}
+                        <span className="ml-1 text-xs font-medium text-muted-foreground">{t('nutrition.grams')}</span>
+                      </div>
                     </div>
                   </div>
                 ) : (

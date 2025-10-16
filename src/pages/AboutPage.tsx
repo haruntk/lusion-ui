@@ -61,15 +61,22 @@ export function AboutPage() {
       <motion.section variants={itemVariants} className="text-center py-16">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold mb-6">
-            {t('about.heroTitlePrefix')} <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold" 
+            <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-bold" 
                         style={{ 
                           WebkitBackgroundClip: 'text', 
                           WebkitTextFillColor: 'transparent',
                           backgroundImage: 'linear-gradient(to right, rgb(37 99 235), rgb(147 51 234))',
                           // @ts-ignore - fallbacks is not a valid property
                           fallbacks: [{ color: 'rgb(37 99 235)' }]
-                        }}>Lusion</span>
+                        }}>About</span>
           </h1>
+          <div className="flex justify-center mb-6">
+            <img 
+              src="/logos/clean_text.png" 
+              alt="Lusion Logo" 
+              className="h-20 md:h-24 w-auto object-contain"
+            />
+          </div>
           <p className="text-xl text-muted-foreground mb-8 leading-relaxed">
             {t('about.heroParagraph')}
           </p>

@@ -2,6 +2,7 @@ export const tr = {
   common: {
     home: 'Ana Sayfa',
     menu: 'Menü',
+    realEstate: 'Gayrimenkul',
     qrCodes: 'QR Kodlar',
     about: 'Hakkında',
     arExperience: 'AR Deneyimi',

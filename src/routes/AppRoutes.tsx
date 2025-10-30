@@ -20,6 +20,7 @@ const AndroidRedirectPage = React.lazy(() => import("@/pages/AndroidRedirectPage
 const IosArLauncherPage = React.lazy(() => import("@/pages/IosArLauncherPage").then(m => ({ default: m.IosArLauncherPage })))
 const UiDemoPage = React.lazy(() => import("@/pages/UiDemoPage").then(m => ({ default: m.UiDemoPage })))
 const DebugPage = React.lazy(() => import("@/pages/DebugPage").then(m => ({ default: m.DebugPage })))
+const AdminModelAddPage = React.lazy(() => import("@/pages/AdminModelAddPage").then(m => ({ default: m.AdminModelAddPage })))
 const NotFoundPage = React.lazy(() => import("@/pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })))
 
 // Loading fallback component
@@ -61,6 +62,7 @@ export function AppRoutes() {
           <Route path="ar/:itemId" element={<ArViewPage />} />
           <Route path="ui-demo" element={<UiDemoPage />} />
           <Route path="debug" element={<DebugPage />} />
+          <Route path="lusion-admin-model" element={<AdminModelAddPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 

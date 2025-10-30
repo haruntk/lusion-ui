@@ -8,6 +8,8 @@ export { default as client } from './client'
 export { itemsApi, getAllItems, getItemById, findItemById, getItemsByCategory, searchItems, getItemCategories, getPaginatedItems } from './items'
 export { arApi, getDeviceCapabilities, getModelUrls, startArSession, getArSessionInfo } from './ar'
 export { qrApi, qrHelpers } from './qr'
+export { verifyAdminKey, addItem, deleteItem, listAllItems } from './admin'
+export type { AdminItemInput, AdminAddItemResponse, AdminVerifyResponse, AdminDeleteItemResponse, AdminListItemsResponse } from './admin'
 
 // Types (re-exported for convenience)
 export type { Item, ItemDetail, Category, ItemSearchParams } from '@/types'

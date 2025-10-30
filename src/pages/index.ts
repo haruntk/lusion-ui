@@ -17,6 +17,9 @@ export { AndroidArPage } from './AndroidArPage'
 export { AndroidRedirectPage } from './AndroidRedirectPage'
 export { IosArLauncherPage } from './IosArLauncherPage'
 
+// Admin Pages
+export { AdminModelAddPage } from './AdminModelAddPage'
+
 // Legacy exports (for backward compatibility)
 export { SimpleWelcomePage as WelcomePage } from './SimpleWelcomePage'
 export { SimpleWelcomePage as HomePage } from './SimpleWelcomePage'

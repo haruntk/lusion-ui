@@ -81,8 +81,8 @@ export function QrCodesPage() {
 
   const handleDownloadQr = async (itemId: string, itemName: string) => {
     try {
-      // Generate QR code URL for the AR experience
-      const arUrl = `${window.location.origin}/ar-view?item_id=${itemId}`
+      // Generate QR code URL for the AR experience (same as ItemDetailPage)
+      const arUrl = `${window.location.origin}/ar-start/${itemId}`
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(arUrl)}`
       
       // Fetch the QR code image
@@ -102,7 +102,7 @@ export function QrCodesPage() {
     } catch (error) {
       logger.error('Failed to download QR code', { error, itemId })
       // Fallback to opening QR code in new tab
-      const arUrl = `${window.location.origin}/ar-view?item_id=${itemId}`
+      const arUrl = `${window.location.origin}/ar-start/${itemId}`
       const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(arUrl)}`
       window.open(qrUrl, '_blank')
     }
@@ -255,7 +255,7 @@ export function QrCodesPage() {
                   <CardHeader className="text-center cursor-pointer">
                     <div className="mx-auto mb-4 p-4 bg-muted rounded-lg">
                       <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent(`${window.location.origin}/ar-view?item_id=${item.id}`)}`}
+                        src={`https://api.qrserver.com/v1/create-qr-code/?size=128x128&data=${encodeURIComponent(`${window.location.origin}/ar-start/${item.id}`)}`}
                         alt={`QR Code for ${item.name}`}
                         className="w-32 h-32 mx-auto"
                         loading="lazy"
@@ -297,7 +297,7 @@ export function QrCodesPage() {
                       className="flex-1 gap-1"
                       onClick={async (e) => {
                         e.preventDefault()
-                        const arUrl = `${window.location.origin}/ar-view?item_id=${item.id}`
+                        const arUrl = `${window.location.origin}/ar-start/${item.id}`
                         try {
                           if (navigator.share) {
                             await navigator.share({

@@ -187,9 +187,9 @@ export function AboutPage() {
                 </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2">
-                <Link to="/menu">
+                <Link to="/models">
                   <ArrowRight className="h-4 w-4" />
-                  {t('about.tryMenu')}
+                  {t('about.tryModels')}
                 </Link>
               </Button>
             </div>

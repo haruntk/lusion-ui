@@ -93,7 +93,7 @@ export function SimpleWelcomePage() {
               whileTap={{ scale: 0.95 }}
             >
               <Button asChild size="lg" className="gap-2">
-                <Link to="/menu" aria-label="Explore our AR menu items">
+                <Link to="/models" aria-label="Explore our AR models">
                   {t('welcome.ctaExplore')}
                   <ArrowRight className="h-4 w-4" aria-hidden="true" />
                 </Link>
@@ -221,8 +221,8 @@ export function SimpleWelcomePage() {
                   whileTap={{ scale: 0.95 }}
                 >
                   <Button asChild size="lg" className="gap-2">
-                    <Link to="/menu" aria-label="Browse our AR-enabled menu items">
-                      {t('welcome.browseMenuItems')}
+                    <Link to="/models" aria-label="Browse our AR-enabled models">
+                      {t('welcome.browseModels')}
                       <ArrowRight className="h-4 w-4" aria-hidden="true" />
                     </Link>
                   </Button>

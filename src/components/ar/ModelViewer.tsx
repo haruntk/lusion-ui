@@ -124,15 +124,19 @@ export function ModelViewer({
   useEffect(() => {
     if (customElements.get('model-viewer')) return
 
+    // Check if script already exists
+    const existingScript = document.querySelector('script[src*="model-viewer"]')
+    if (existingScript) return
+
     const script = document.createElement('script')
     script.type = 'module'
-    script.src = 'https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js'
+    // Use specific version for production stability
+    script.src = 'https://unpkg.com/@google/model-viewer@3.3.0/dist/model-viewer.min.js'
     script.async = true
+    script.crossOrigin = 'anonymous'
     document.head.appendChild(script)
 
-    return () => {
-      document.head.removeChild(script)
-    }
+    // Don't remove script on unmount - it's a global resource
   }, [])
 
   if (!modelViewerLoaded) {
@@ -159,6 +163,25 @@ export function ModelViewer({
     )
   }
 
+  // Build dynamic attributes for model-viewer
+  // Boolean attributes need to be present/absent, not true/false strings
+  const arAttributes: Record<string, any> = {}
+  if (ar) {
+    arAttributes['ar'] = ''
+  }
+  if (autoRotate) {
+    arAttributes['auto-rotate'] = ''
+  }
+  if (cameraControls) {
+    arAttributes['camera-controls'] = ''
+  }
+  if (autoplay) {
+    arAttributes['autoplay'] = ''
+  }
+  if (animationLoop) {
+    arAttributes['animation-loop'] = ''
+  }
+
   return (
     // @ts-ignore - model-viewer is a custom element
     <model-viewer
@@ -169,16 +192,11 @@ export function ModelViewer({
       poster={poster}
       loading={loading}
       reveal={reveal}
-      ar={ar}
       ar-modes={arModes}
       ar-scale={arScale}
-      auto-rotate={autoRotate}
       auto-rotate-delay={autoRotateDelay}
-      autoplay={autoplay}
       animation-name={animationName}
-      animation-loop={animationLoop}
       animation-crossfade-duration={animationCrossfadeDuration}
-      camera-controls={cameraControls}
       camera-orbit={cameraOrbit}
       environment-image={environmentImage}
       exposure={exposure}
@@ -186,6 +204,7 @@ export function ModelViewer({
       shadow-softness={shadowSoftness}
       className={className}
       style={style}
+      {...arAttributes}
     >
       {children}
     </model-viewer>   // @ts-ignore - model-viewer is a custom element

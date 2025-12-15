@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Link, useLocation } from "react-router-dom"
 import { motion, AnimatePresence } from "framer-motion"
-import { Menu, X, Home, Package, QrCode, Info, Sparkles, Building2 } from "lucide-react"
+import { Menu, X, Home, Boxes, QrCode, Info, Sparkles, Upload } from "lucide-react"
 import { Button, ThemeToggle } from "@/components/ui"
 import { cn } from "@/utils"
 import { LanguageMenu } from '@/components/ui/LanguageMenu'
@@ -9,10 +9,9 @@ import { useLanguage } from '@/hooks/useLanguage'
 
 const baseNavItems = [
   { key: 'common.home', href: '/', icon: <Home className="h-4 w-4" /> },
-  { key: 'common.menu', href: '/menu', icon: <Package className="h-4 w-4" /> },
-  { key: 'common.realEstate', href: '/real-estate', icon: <Building2 className="h-4 w-4" /> },
+  { key: 'common.models', href: '/models', icon: <Boxes className="h-4 w-4" /> },
+  { key: 'common.tryModel', href: '/try-model', icon: <Upload className="h-4 w-4" /> },
   { key: 'common.arExperience', href: '/ar-view', icon: <Sparkles className="h-4 w-4" /> },
-  { key: 'common.qrCodes', href: '/qr', icon: <QrCode className="h-4 w-4" /> },
   { key: 'common.about', href: '/about', icon: <Info className="h-4 w-4" /> },
 ] as const
 

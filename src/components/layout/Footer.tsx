@@ -7,9 +7,9 @@ import { useLanguage } from "@/hooks/useLanguage"
 const baseFooterLinks = {
   navigation: [
     { key: "common.home", href: "/" },
-    { key: "common.menu", href: "/menu" },
+    { key: "common.models", href: "/models" },
+    { key: "common.tryModel", href: "/try-model" },
     { key: "common.about", href: "/about" },
-    { key: "about.contactUs", href: "/contact" },
   ],
   support: [
     { key: "footer.helpCenter", href: "#" },
@@ -48,7 +48,7 @@ export function Footer() {
               {APP_CONFIG.DESCRIPTION}
             </p>
             <p className="text-xs text-muted-foreground">
-              {t('footer.transformingDining')}
+              {t('footer.transformingExperiences')}
             </p>
           </motion.div>
 

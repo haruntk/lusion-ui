@@ -59,9 +59,9 @@ export function ArViewPage() {
             </p>
             <div className="space-y-2">
               <Button asChild className="gap-2 w-full">
-                <Link to="/menu">
+                <Link to="/models">
                   <ArrowLeft className="h-4 w-4" />
-                  {t('common.exploreMenu')}
+                  {t('common.exploreModels')}
                 </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2 w-full">
@@ -115,9 +115,9 @@ export function ArViewPage() {
             </p>
             <div className="space-y-2">
               <Button asChild className="gap-2 w-full">
-                <Link to="/menu">
+                <Link to="/models">
                   <ArrowLeft className="h-4 w-4" />
-                  {t('common.exploreMenu')}
+                  {t('common.exploreModels')}
                 </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2 w-full">
@@ -147,9 +147,9 @@ export function ArViewPage() {
             </p>
             <div className="space-y-2">
               <Button asChild className="gap-2 w-full">
-                <Link to="/menu">
+                <Link to="/models">
                   <ArrowLeft className="h-4 w-4" />
-                  {t('common.exploreMenu')}
+                  {t('common.exploreModels')}
                 </Link>
               </Button>
               <Button asChild variant="outline" className="gap-2 w-full">
@@ -211,7 +211,7 @@ export function ArViewPage() {
       >
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <Button asChild variant="ghost" size="sm" className="hover:bg-foreground/10 transition-all">
-            <Link to="/menu" className="gap-2">
+            <Link to="/models" className="gap-2">
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -221,7 +221,7 @@ export function ArViewPage() {
             </Badge>
           </div>
           <Button asChild variant="ghost" size="sm" className="hover:bg-foreground/10 transition-all">
-            <Link to={`/menu/${item.id}`} className="gap-2">
+            <Link to={`/models/${item.id}`} className="gap-2">
               <Info className="h-4 w-4" />
             </Link>
           </Button>
@@ -282,8 +282,8 @@ export function ArViewPage() {
                   {t('ar.ctaStart')}
                 </Button>
                 <Button asChild variant="outline" size="lg" className="px-8">
-                  <Link to="/menu">
-                    {t('common.returnToMenu')}
+                  <Link to="/models">
+                    {t('common.returnToModels')}
                   </Link>
                 </Button>
               </div>

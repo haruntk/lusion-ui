@@ -146,9 +146,9 @@ export function ArViewer({
             </p>
             <div className="space-y-2 pt-4">
               <Button asChild className="w-full">
-                <Link to="/menu">
+                <Link to="/models">
                   <ArrowLeft className="h-4 w-4 mr-2" />
-                  {t('common.returnToMenu')}
+                  {t('common.returnToModels')}
                 </Link>
               </Button>
             </div>
@@ -230,9 +230,9 @@ export function ArViewer({
           </Button>
         ) : (
           <Button asChild variant="ghost" className="hover:bg-foreground/10">
-            <Link to="/menu">
+            <Link to="/models">
               <ArrowLeft className="h-4 w-4 mr-2" />
-              {t('common.returnToMenu')}
+              {t('common.returnToModels')}
             </Link>
           </Button>
         )}

@@ -131,9 +131,9 @@ export function NotFoundPage() {
             whileTap={{ scale: 0.95 }}
           >
             <Button asChild variant="outline" size="lg" className="gap-2">
-              <Link to="/menu">
+              <Link to="/models">
                 <Search className="h-4 w-4" aria-hidden="true" />
-                {t('common.browseMenu')}
+                {t('common.browseModels')}
               </Link>
             </Button>
           </motion.div>

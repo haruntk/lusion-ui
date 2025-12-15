@@ -45,9 +45,9 @@ export function ModelViewerPage() {
               {error || "Bu ürünün 3D modeli yüklenemedi."}
             </p>
             <Button asChild variant="outline" className="gap-2">
-              <Link to="/menu">
+              <Link to="/models">
                 <ArrowLeft className="h-4 w-4" />
-                Menüye Dön
+                Modellere Dön
               </Link>
             </Button>
           </CardContent>
@@ -63,7 +63,7 @@ export function ModelViewerPage() {
         <div className="container mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <Button asChild variant="ghost" size="sm" className="gap-2">
-              <Link to="/menu">
+              <Link to="/models">
                 <ArrowLeft className="h-4 w-4" />
                 Geri
               </Link>
@@ -187,13 +187,13 @@ export function ModelViewerPage() {
                   AR'da Görüntüle
                 </Button>
                 <Button asChild variant="outline" className="w-full">
-                  <Link to={`/menu/${item.id}`}>
+                  <Link to={`/models/${item.id}`}>
                     Ürün Detayları
                   </Link>
                 </Button>
                 <Button asChild variant="outline" className="w-full">
-                  <Link to="/menu">
-                    Menüye Dön
+                  <Link to="/models">
+                    Modellere Dön
                   </Link>
                 </Button>
               </CardContent>

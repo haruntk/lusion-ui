@@ -1,7 +1,6 @@
 // Main Pages
 export { SimpleWelcomePage } from './SimpleWelcomePage'
-export { MenuPage } from './MenuPage'
-export { RealEstatePage } from './RealEstatePage'
+export { ModelsPage } from './ModelsPage'
 export { AboutPage } from './AboutPage'
 export { ContactPage } from './ContactPage'
 export { QrCodesPage } from './QrCodesPage'
@@ -16,6 +15,8 @@ export { MarkerPage } from './MarkerPage'
 export { AndroidArPage } from './AndroidArPage'
 export { AndroidRedirectPage } from './AndroidRedirectPage'
 export { IosArLauncherPage } from './IosArLauncherPage'
+export { TryModelPage } from './TryModelPage'
+export { CustomArViewPage } from './CustomArViewPage'
 
 // Admin Pages
 export { AdminModelAddPage } from './AdminModelAddPage'

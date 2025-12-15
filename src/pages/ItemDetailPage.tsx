@@ -286,9 +286,9 @@ export function ItemDetailPage() {
       {/* Back Button */}
       <motion.div variants={itemVariants}>
         <Button asChild variant="ghost" className="mb-6 gap-2">
-          <Link to="/menu">
+          <Link to="/models">
             <ArrowLeft className="h-4 w-4" />
-            {t('common.returnToMenu')}
+            {t('common.returnToModels')}
           </Link>
         </Button>
       </motion.div>
@@ -700,7 +700,7 @@ export function ItemDetailPage() {
                 </Button>
                 
                 <Button asChild variant="outline" className="w-full gap-2">
-                  <Link to="/menu">
+                  <Link to="/models">
                     <Package className="h-4 w-4" />
                     {t('item.browseMoreItems')}
                   </Link>

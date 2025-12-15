@@ -6,8 +6,7 @@ import { Spinner } from "@/components/ui"
 // Lazy load all pages for consistent behavior  
 const WelcomePage = React.lazy(() => import("@/pages/SimpleWelcomePage").then(m => ({ default: m.SimpleWelcomePage })))
 // Lazy load other pages for better performance
-const MenuPage = React.lazy(() => import("@/pages/MenuPage").then(m => ({ default: m.MenuPage })))
-const RealEstatePage = React.lazy(() => import("@/pages/RealEstatePage").then(m => ({ default: m.RealEstatePage })))
+const ModelsPage = React.lazy(() => import("@/pages/ModelsPage").then(m => ({ default: m.ModelsPage })))
 const AboutPage = React.lazy(() => import("@/pages/AboutPage").then(m => ({ default: m.AboutPage })))
 const ContactPage = React.lazy(() => import("@/pages/ContactPage").then(m => ({ default: m.ContactPage })))
 const QrCodesPage = React.lazy(() => import("@/pages/QrCodesPage").then(m => ({ default: m.QrCodesPage })))
@@ -21,6 +20,8 @@ const IosArLauncherPage = React.lazy(() => import("@/pages/IosArLauncherPage").t
 const UiDemoPage = React.lazy(() => import("@/pages/UiDemoPage").then(m => ({ default: m.UiDemoPage })))
 const DebugPage = React.lazy(() => import("@/pages/DebugPage").then(m => ({ default: m.DebugPage })))
 const AdminModelAddPage = React.lazy(() => import("@/pages/AdminModelAddPage").then(m => ({ default: m.AdminModelAddPage })))
+const TryModelPage = React.lazy(() => import("@/pages/TryModelPage").then(m => ({ default: m.TryModelPage })))
+const CustomArViewPage = React.lazy(() => import("@/pages/CustomArViewPage").then(m => ({ default: m.CustomArViewPage })))
 const NotFoundPage = React.lazy(() => import("@/pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })))
 
 // Loading fallback component
@@ -52,8 +53,10 @@ export function AppRoutes() {
         {/* Routes with Layout */}
         <Route path="/" element={<Layout key="layout" />}>
           <Route index element={<WelcomePage />} />
-          <Route path="menu" element={<MenuPage />} />
-          <Route path="real-estate" element={<RealEstatePage />} />
+          <Route path="models" element={<ModelsPage />} />
+          <Route path="models/:id" element={<ItemDetailPage />} />
+          {/* Legacy routes - redirect to new models page */}
+          <Route path="menu" element={<ModelsPage />} />
           <Route path="menu/:id" element={<ItemDetailPage />} />
           <Route path="view/:id" element={<ModelViewerPage />} />
           <Route path="about" element={<AboutPage />} />
@@ -63,6 +66,8 @@ export function AppRoutes() {
           <Route path="ui-demo" element={<UiDemoPage />} />
           <Route path="debug" element={<DebugPage />} />
           <Route path="lusion-admin-model" element={<AdminModelAddPage />} />
+          <Route path="try-model" element={<TryModelPage />} />
+          <Route path="custom-ar" element={<CustomArViewPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
 
